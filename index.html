@@ -1,0 +1,1619 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#b96f58">
+<meta name="description" content="A customisable photo booth for weddings, parties and events.">
+<link rel="manifest" href="./manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="./icons/icon-192.png">
+<link rel="apple-touch-icon" href="./icons/icon-192.png">
+<title>Memory Booth — Photo Booth</title>
+<style>
+  :root {
+    --accent: #b96f58;
+    --accent-dark: #87503f;
+    --ink: #272622;
+    --muted: #77736e;
+    --paper: #fbf8f3;
+    --line: #e8e0d6;
+    --card: #fffefa;
+    --soft: #f2ebe2;
+    --good: #2d7858;
+    --shadow: 0 18px 50px rgba(51, 39, 29, .08);
+  }
+  * { box-sizing: border-box; }
+  html { min-height: 100%; background: var(--paper); }
+  body {
+    margin: 0; color: var(--ink); background:
+      radial-gradient(circle at 7% 0%, rgba(185,111,88,.09), transparent 28rem),
+      var(--paper);
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    min-height: 100vh;
+  }
+  button, input, select { font: inherit; }
+  button { cursor: pointer; }
+  button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px solid rgba(185,111,88,.35); outline-offset: 2px; }
+  .app-shell { width: min(1180px, calc(100% - 32px)); margin: 0 auto; padding: 22px 0 42px; }
+  .topbar { display:flex; justify-content:space-between; align-items:center; gap:16px; margin-bottom: 34px; }
+  .brand-lockup { display:flex; gap:12px; align-items:center; min-width:0; }
+  .brand-mark { width:43px; height:43px; border-radius:15px; background:var(--accent); display:grid; place-items:center; color:white; box-shadow:0 7px 18px rgba(185,111,88,.22); flex-shrink:0; }
+  .brand-mark svg { width:23px; height:23px; }
+  .brand-name { font-size:13px; letter-spacing:.15em; font-weight:850; text-transform:uppercase; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .brand-sub { color:var(--muted); font-size:11px; margin-top:3px; letter-spacing:.04em; }
+  .top-pill { display:flex; gap:8px; align-items:center; color:#5b6159; background:#edf2eb; border:1px solid #dde7d9; border-radius:100px; padding:9px 13px; font-size:12px; white-space:nowrap; }
+  .dot { width:7px; height:7px; border-radius:50%; background:#4f9368; }
+  .screen { display:none; animation: enter .28s ease both; }
+  .screen.active { display:block; }
+  @keyframes enter { from { opacity:0; transform:translateY(7px); } to {opacity:1; transform:translateY(0);} }
+  .eyebrow { font-size:11px; letter-spacing:.18em; font-weight:800; text-transform:uppercase; color:var(--accent-dark); }
+  h1 { font-family: Georgia, "Times New Roman", serif; letter-spacing:-.045em; line-height:1.02; font-size:clamp(36px,5vw,64px); font-weight:500; margin:11px 0 14px; }
+  h2 { font-family:Georgia, "Times New Roman", serif; letter-spacing:-.025em; font-size:27px; font-weight:500; margin:0; }
+  h3 { font-size:14px; margin:0; }
+  p { color:var(--muted); line-height:1.65; }
+  .welcome-grid { display:grid; grid-template-columns: 1.05fr .95fr; gap:30px; align-items:start; }
+  .intro { padding: 14px 0 0; }
+  .intro p { max-width:480px; margin:0 0 26px; font-size:15px; }
+  .feature-row { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-top:34px; }
+  .feature { border-top:1px solid var(--line); padding-top:13px; }
+  .feature-icon { color:var(--accent); width:22px; height:22px; margin-bottom:10px; }
+  .feature b { display:block; font-size:12px; margin-bottom:4px; }
+  .feature small { color:var(--muted); font-size:11px; line-height:1.45; display:block; }
+  .panel { background:var(--card); border:1px solid var(--line); border-radius:22px; padding:23px; box-shadow:var(--shadow); }
+  .panel-head { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:20px; }
+  .panel-head p { font-size:12px; margin:5px 0 0; }
+  .tiny-tag { color:var(--accent-dark); font-size:10px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; background:#f5e9e2; padding:7px 9px; border-radius:100px; white-space:nowrap; }
+  .field-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  .field { display:flex; flex-direction:column; gap:7px; min-width:0; }
+  .field.full { grid-column:1/-1; }
+  label { color:#57534e; font-size:11px; font-weight:750; }
+  input[type="text"], input[type="date"], input[type="url"], input[type="number"], select, textarea { width:100%; min-width:0; border:1px solid #e4dcd2; border-radius:10px; background:#fffdfa; padding:11px 12px; color:var(--ink); font-size:13px; }
+  textarea { resize:vertical; min-height:86px; line-height:1.5; }
+  input[type="color"] { width:100%; height:42px; border:1px solid #e4dcd2; padding:4px; border-radius:10px; background:#fffdfa; }
+  .color-and-theme { display:grid; grid-template-columns:.72fr 1.28fr; gap:13px; }
+  .helper { color:#8b847c; font-size:10px; line-height:1.45; margin-top:3px; }
+  .save-location-row { display:flex; align-items:center; gap:11px; flex-wrap:wrap; }
+  .save-location-status { flex:1; min-width:180px; color:#7b786f; font-size:11px; line-height:1.5; }
+  .save-location-status.saved { color:#2d7858; }
+  .save-location-status.error { color:#944b3b; }
+  .save-location-status strong { font-weight:800; }
+  .btn { display:inline-flex; gap:9px; align-items:center; justify-content:center; border-radius:11px; padding:12px 16px; border:1px solid transparent; font-size:12px; font-weight:800; transition:transform .15s, background .15s; }
+  .btn:hover { transform:translateY(-1px); }
+  .btn-primary { color:white; background:var(--accent); box-shadow:0 8px 18px rgba(185,111,88,.19); }
+  .btn-primary:hover { background:var(--accent-dark); }
+  .btn-secondary { background:#fffdfa; border-color:var(--line); color:var(--ink); }
+  .btn-soft { background:#f5eee6; color:#6f5547; }
+  .btn-danger { background:#fff1ed; color:#944b3b; border-color:#f1d9d1; }
+  .btn svg { width:16px; height:16px; }
+  .btn-row { display:flex; flex-wrap:wrap; gap:9px; margin-top:20px; }
+  .btn-row .btn-primary { flex:1; }
+  .privacy-note { display:flex; gap:8px; align-items:flex-start; margin-top:15px; color:#7b786f; font-size:10px; line-height:1.5; }
+  .privacy-note svg { width:15px; height:15px; color:var(--good); flex-shrink:0; margin-top:1px; }
+  .error-box { display:none; margin-top:15px; padding:11px 12px; border:1px solid #efcfc7; border-radius:10px; background:#fff2ee; color:#844333; font-size:12px; line-height:1.5; }
+  .error-box.show { display:block; }
+  .capture-header { display:flex; align-items:flex-end; justify-content:space-between; gap:18px; margin-bottom:20px; }
+  .capture-header h1 { font-size:clamp(32px,4vw,46px); margin-bottom:7px; }
+  .capture-header p { margin:0; font-size:13px; }
+  .counter-chip { padding:10px 13px; border:1px solid var(--line); background:var(--card); border-radius:12px; font-size:12px; font-weight:800; white-space:nowrap; }
+  .capture-grid { display:grid; grid-template-columns:minmax(0,1.55fr) minmax(260px,.75fr); gap:22px; }
+  .camera-card { background:#242320; border-radius:20px; overflow:hidden; position:relative; min-height:350px; box-shadow:var(--shadow); }
+  .camera-card video { display:block; width:100%; height:100%; min-height:350px; max-height:590px; object-fit:cover; transform:scaleX(-1); }
+  .camera-placeholder { position:absolute; inset:0; color:white; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; padding:24px; gap:10px; background:linear-gradient(140deg,#3d3935,#191918); }
+  .camera-placeholder svg { width:40px; height:40px; color:#d9aa96; }
+  .camera-placeholder strong { font-family:Georgia,serif; font-size:26px; font-weight:500; }
+  .camera-placeholder span { font-size:12px; color:#d4cfc7; max-width:270px; line-height:1.5; }
+  .camera-topline { position:absolute; top:14px; left:14px; right:14px; display:flex; justify-content:space-between; pointer-events:none; }
+  .camera-label { padding:7px 10px; border-radius:100px; background:rgba(20,20,19,.58); color:white; backdrop-filter:blur(8px); font-size:10px; letter-spacing:.04em; }
+  .countdown-overlay { display:none; position:absolute; inset:0; place-items:center; background:rgba(20,18,17,.22); color:white; font-family:Georgia,serif; font-size:clamp(90px,15vw,170px); text-shadow:0 4px 35px rgba(0,0,0,.3); }
+  .countdown-overlay.show { display:grid; }
+  .flash { animation: flash .28s ease-out; }
+  @keyframes flash { 0%{filter:brightness(2.7)} 100%{filter:brightness(1)} }
+  .side-panel { display:flex; flex-direction:column; gap:15px; }
+  .status-card, .shots-card { background:var(--card); border:1px solid var(--line); border-radius:18px; padding:18px; }
+  .status-title { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-bottom:12px; }
+  .status-num { color:var(--accent-dark); font-size:11px; font-weight:850; background:#f5e9e2; border-radius:8px; padding:7px 9px; }
+  .status-message { color:var(--muted); font-size:12px; line-height:1.6; min-height:38px; }
+  .progress-track { height:5px; border-radius:100px; background:#eee7df; overflow:hidden; margin:12px 0 7px; }
+  .progress-fill { height:100%; width:0; background:var(--accent); transition:width .25s ease; }
+  .progress-label { display:flex; justify-content:space-between; color:#8b847c; font-size:10px; }
+  .shots-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:9px; margin-top:14px; }
+  .shot-slot { aspect-ratio:1.25; background:#f2ede6; border:1px dashed #d9cec3; border-radius:10px; position:relative; overflow:hidden; display:grid; place-items:center; color:#a7a096; font-size:11px; }
+  .shot-slot img { width:100%; height:100%; object-fit:cover; }
+  .shot-slot .slot-number { position:absolute; left:7px; top:6px; width:21px; height:21px; border-radius:7px; background:rgba(255,255,255,.9); color:#4f4941; display:grid; place-items:center; font-size:10px; font-weight:850; }
+  .review-grid { display:grid; grid-template-columns:minmax(0,1fr) minmax(270px,.72fr); gap:24px; align-items:start; }
+  .review-copy { padding:17px 0; }
+  .review-copy h1 { font-size:clamp(34px,4vw,51px); }
+  .review-copy p { font-size:13px; max-width:430px; }
+  .strip-stage { background:#eee7de; border:1px solid #e0d7cc; border-radius:20px; padding:18px; display:flex; justify-content:center; box-shadow:var(--shadow); }
+  .strip-stage img { display:block; max-height:72vh; width:auto; max-width:100%; border-radius:3px; box-shadow:0 8px 22px rgba(45,35,25,.14); }
+  .review-details { display:flex; align-items:center; gap:10px; font-size:11px; color:var(--muted); margin-top:18px; }
+  .review-details svg { width:16px; height:16px; color:var(--good); }
+  .review-actions { display:flex; flex-wrap:wrap; gap:9px; margin-top:23px; }
+  .review-actions .btn-primary { flex:1; }
+  .footer { text-align:center; color:#a49b91; font-size:10px; padding-top:33px; }
+  .footer strong { color:#776a5d; font-weight:750; }
+  .hidden { display:none !important; }
+  .guest-mode-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:14px; }
+  .guest-mode-card { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:9px; min-height:190px; padding:22px 14px; border:1px solid var(--line); border-radius:17px; background:#fffdfa; color:var(--ink); text-align:center; transition:transform .15s,border-color .15s,background .15s; }
+  .guest-mode-card:hover { transform:translateY(-2px); border-color:var(--accent); background:color-mix(in srgb, var(--accent) 5%, white); }
+  .guest-mode-card strong { font-size:17px; }
+  .guest-mode-card span:last-child { color:var(--muted); font-size:12px; }
+  .mode-icon { display:grid; place-items:center; width:54px; height:54px; border-radius:17px; background:color-mix(in srgb, var(--accent) 13%, white); color:var(--accent-dark); font-size:33px; }
+  .guest-hint { font-size:11px; margin:18px 0 0; }
+  .mode-key { display:inline-flex; align-items:center; gap:5px; margin-top:4px; color:var(--muted); font-size:11px; }
+  .mode-key kbd { display:inline-grid; place-items:center; min-width:25px; height:25px; border:1px solid #d8cfc4; border-bottom-width:3px; border-radius:7px; background:#fff; color:var(--ink); font-size:13px; font-weight:850; font-family:inherit; }
+  .section-break { border-top:1px solid var(--line); padding-top:18px; margin-top:5px; }
+  .section-break strong { display:block; font-size:12px; letter-spacing:.08em; text-transform:uppercase; }
+  .section-break small { display:block; color:var(--muted); font-weight:400; text-transform:none; letter-spacing:0; margin-top:5px; line-height:1.5; }
+  .completion-shell { width:min(900px,100%); margin:10px auto 0; }
+  .completion-card { --finish-bg:#23211f; --finish-text:#fffaf4; background:var(--finish-bg); color:var(--finish-text); border-radius:28px; padding:clamp(28px,6vw,68px); text-align:center; box-shadow:0 24px 70px rgba(30,22,16,.17); border:1px solid color-mix(in srgb,var(--finish-text) 14%,transparent); }
+  .completion-logo { display:block; object-fit:contain; max-width:135px; max-height:90px; margin:0 auto 24px; }
+  .completion-event { color:color-mix(in srgb,var(--finish-text) 68%,transparent); font-size:11px; font-weight:800; letter-spacing:.16em; text-transform:uppercase; overflow-wrap:anywhere; }
+  .completion-card h1 { color:var(--finish-text); font-size:clamp(38px,6vw,68px); margin:16px auto 20px; max-width:760px; overflow-wrap:anywhere; }
+  .completion-message { color:color-mix(in srgb,var(--finish-text) 85%,transparent); white-space:pre-line; font-size:clamp(15px,2vw,19px); line-height:1.7; max-width:690px; margin:0 auto 22px; overflow-wrap:anywhere; }
+  .completion-save-status { display:inline-block; max-width:100%; padding:11px 15px; border-radius:12px; border:1px solid color-mix(in srgb,var(--finish-text) 19%,transparent); background:color-mix(in srgb,var(--finish-text) 7%,transparent); color:var(--finish-text); font-size:12px; line-height:1.5; overflow-wrap:anywhere; }
+  .completion-save-status.error { border-color:#d97d6a; background:rgba(217,125,106,.13); }
+  .completion-website { margin:30px auto 0; max-width:680px; padding-top:24px; border-top:1px solid color-mix(in srgb,var(--finish-text) 22%,transparent); }
+  .completion-website-label { color:var(--accent); font-size:11px; font-weight:900; letter-spacing:.17em; text-transform:uppercase; margin-bottom:8px; }
+  .completion-website-url { color:var(--finish-text); font-size:clamp(19px,3vw,29px); font-weight:750; overflow-wrap:anywhere; }
+  .completion-timer { display:flex; justify-content:center; align-items:center; gap:6px; color:color-mix(in srgb,var(--finish-text) 62%,transparent); font-size:11px; margin-top:27px; }
+  .completion-timer strong { color:var(--finish-text); font-size:14px; min-width:13px; }
+  .completion-track { width:min(300px,100%); height:4px; margin:10px auto 0; border-radius:100px; background:color-mix(in srgb,var(--finish-text) 17%,transparent); overflow:hidden; }
+  .completion-progress { height:100%; width:0; background:var(--accent); transition:width .18s linear; }
+  .auth-wrap { width:min(560px,100%); margin:20px auto; }
+  .auth-panel { padding:clamp(22px,4vw,38px); }
+  .auth-panel h1,.admin-heading h1 { font-size:clamp(36px,5vw,58px); }
+  .admin-heading { display:flex; justify-content:space-between; align-items:flex-start; gap:20px; margin-bottom:20px; }
+  .admin-heading p { max-width:660px; margin:0; }
+  .admin-pin-box { margin-top:25px; padding-top:22px; border-top:1px solid var(--line); }
+  .admin-access-btn { margin-left:10px; padding:4px 6px; border:0; border-radius:6px; background:transparent; color:#a49b91; font-size:10px; text-decoration:underline; text-underline-offset:2px; }
+  .admin-access-btn:hover { color:var(--accent-dark); background:color-mix(in srgb, var(--accent) 7%, white); }
+  input[type="password"],input[type="file"] { width:100%; min-width:0; border:1px solid #e4dcd2; border-radius:10px; background:#fffdfa; padding:11px 12px; color:var(--ink); font-size:13px; }
+  input[type="file"] { padding:8px; }
+  @media (max-width: 850px) {
+    .welcome-grid, .capture-grid, .review-grid { grid-template-columns:1fr; }
+    .admin-heading { flex-direction:column; }
+    .intro { padding-top:0; }
+    .feature-row { margin-top:24px; }
+    .capture-grid { gap:14px; }
+    .side-panel { display:grid; grid-template-columns:1fr 1fr; align-items:start; }
+    .review-copy { padding:0; }
+    .strip-stage img { max-height:60vh; }
+  }
+  @media (max-width: 540px) {
+    .app-shell { width:min(100% - 20px, 1180px); padding-top:13px; }
+    .topbar { margin-bottom:22px; }
+    .top-pill { font-size:10px; padding:8px 9px; }
+    .panel { padding:17px; }
+    .field-grid { grid-template-columns:1fr; }
+    .guest-mode-grid { grid-template-columns:1fr; }
+    .guest-mode-card { min-height:145px; }
+    .field.full { grid-column:auto; }
+    .side-panel { grid-template-columns:1fr; }
+    .capture-header { align-items:flex-start; flex-direction:column; }
+    .camera-card, .camera-card video { min-height:290px; }
+    .feature-row { grid-template-columns:1fr 1fr 1fr; gap:8px; }
+    .feature small { font-size:10px; }
+    .btn { padding:12px 12px; }
+  }
+  @media (prefers-reduced-motion: reduce) { *,*::before,*::after { animation-duration:.01ms !important; transition-duration:.01ms !important; } }
+
+    .feature-panel{margin:0 0 18px;padding:18px;border:1px solid var(--line);border-radius:18px;background:rgba(255,255,255,.72)}
+    .feature-panel h3{margin:0 0 8px;font-size:15px}.feature-panel p{margin:0 0 12px;color:var(--muted);font-size:12px}
+    .profile-controls{display:grid;grid-template-columns:minmax(180px,1fr) repeat(3,auto);gap:8px;align-items:end}
+    .profile-controls .field{margin:0}.storage-meter{height:9px;border-radius:99px;background:#e9e1da;overflow:hidden;margin:9px 0}.storage-meter span{display:block;height:100%;width:0;background:var(--accent);transition:width .25s}
+    .storage-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.storage-stat{padding:10px;border-radius:12px;background:#fff;font-size:12px}.storage-stat strong{display:block;font-size:17px;margin-bottom:3px}
+    .feature-note{font-size:11px!important;color:var(--muted);line-height:1.5}
+    .pose-banner{position:absolute;z-index:5;left:50%;bottom:18px;transform:translateX(-50%);width:max-content;max-width:90%;padding:11px 18px;border-radius:999px;background:rgba(25,23,22,.88);color:#fff;font-size:clamp(12px,1.5vw,18px);font-weight:800;text-align:center;box-shadow:0 8px 30px #0003}
+    .preview-shell{display:grid;grid-template-columns:minmax(0,1fr) minmax(260px,.8fr);gap:clamp(20px,4vw,52px);align-items:center;max-width:1080px;margin:auto;padding:clamp(22px,4vw,48px)}
+    .preview-copy h1{font-size:clamp(34px,5vw,58px);line-height:1.04;margin:12px 0}.preview-copy p{color:var(--muted);line-height:1.6}.preview-image{display:flex;justify-content:center;align-items:center;background:#f4eee8;border:1px solid var(--line);border-radius:22px;padding:18px;min-height:300px}.preview-image img{max-height:68vh;max-width:100%;object-fit:contain;box-shadow:0 15px 45px #0002;border-radius:5px}.preview-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:22px}
+    @media(max-width:760px){.profile-controls{grid-template-columns:1fr 1fr}.preview-shell{grid-template-columns:1fr}.preview-image img{max-height:46vh}.storage-grid{grid-template-columns:1fr 1fr}}
+
+</style>
+</head>
+<body>
+<div class="app-shell">
+  <header class="topbar">
+    <div class="brand-lockup">
+      <div class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="6.5" width="18" height="14" rx="3"/><path d="M8 6.5 9.5 4h5L16 6.5"/><circle cx="12" cy="13.5" r="4"/><circle cx="18" cy="9.5" r=".8" fill="currentColor" stroke="none"/></svg>
+      </div>
+      <div>
+        <div class="brand-name" id="topBrand">Memory Booth</div>
+        <div class="brand-sub">A little moment. A lasting memory.</div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end">
+      <button type="button" class="btn btn-secondary hidden" id="installAppButton">Install app</button>
+      <div class="top-pill"><span class="dot"></span> Memory Booth</div>
+    </div>
+  </header>
+
+  <main>
+    <section class="screen active" id="welcomeScreen" aria-labelledby="welcomeTitle">
+      <div class="welcome-grid">
+        <div class="intro">
+          <div class="eyebrow">Your event, your style</div>
+          <h1 id="welcomeTitle">Make a memory<br>worth keeping.</h1>
+          <p>A simple, customisable photo booth for weddings, birthdays and celebrations. Get everyone together, strike a pose, and take home a little piece of the day.</p>
+          <div class="feature-row">
+            <div class="feature">
+              <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.3 2"/></svg>
+              <b>Choose your session</b><small>One photo or four timed shots.</small>
+            </div>
+            <div class="feature">
+              <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M7 7h10M7 11h10M7 15h6"/></svg>
+              <b>Custom layout</b><small>Designed for this event.</small>
+            </div>
+            <div class="feature">
+              <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 3v12m-4-4 4 4 4-4"/><path d="M5 16v4h14v-4"/></svg>
+              <b>Easy download</b><small>Save a print-ready PNG from the browser.</small>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel guest-choice-panel">
+          <div class="panel-head">
+            <div><h2 id="guestEventTitle">Welcome to our event</h2><p id="guestEventSubtitle">Choose your photo experience to begin.</p></div>
+            <span class="tiny-tag">Your turn</span>
+          </div>
+          <div class="guest-mode-grid">
+            <button type="button" class="guest-mode-card" id="singlePhotoButton">
+              <span class="mode-icon">◉</span><strong>Single photo</strong><span>One photo to keep</span><span class="mode-key">Press <kbd>1</kbd></span>
+            </button>
+            <button type="button" class="guest-mode-card" id="posePhotoButton">
+              <span class="mode-icon">✦</span><strong>Pose challenge</strong><span>Four photos with random fun prompts</span><span class="mode-key">Press <kbd>2</kbd></span>
+            </button>
+            <button type="button" class="guest-mode-card" id="filterPhotoButton">
+              <span class="mode-icon">✧</span><strong>Filter mix</strong><span>Four photos, each with a different filter</span><span class="mode-key">Press <kbd>3</kbd></span>
+            </button>
+            <button type="button" class="guest-mode-card" id="fourPhotoButton">
+              <span class="mode-icon">▦</span><strong>4-photo session</strong><span>Four photos in one layout</span><span class="mode-key">Press <kbd>4</kbd></span>
+            </button>
+          </div>
+          <p class="guest-hint">Choose on screen or use a USB keyboard: <strong>1</strong> single photo, <strong>2</strong> pose challenge, <strong>3</strong> four-filter mix, or <strong>4</strong> standard four-photo session. Photos save automatically to the host-selected SD card folder.</p>
+          <div class="error-box" id="welcomeError" role="alert"></div>
+        </div>      </div>
+    </section>
+
+    <section class="screen" id="adminLoginScreen" aria-labelledby="adminLoginTitle">
+      <div class="auth-wrap">
+        <div class="panel auth-panel">
+          <div class="eyebrow">Restricted area</div>
+          <h1 id="adminLoginTitle">Administrator<br>sign-in.</h1>
+          <p>Enter your administrator PIN to change event settings. Guests cannot access the setup screen without this PIN.</p>
+          <form id="adminLoginForm">
+            <div class="field"><label for="adminPinInput">ADMIN PIN</label><input type="password" id="adminPinInput" inputmode="numeric" autocomplete="current-password" maxlength="12" required placeholder="Enter PIN"></div>
+            <div class="btn-row"><button type="submit" class="btn btn-primary">Unlock settings</button><button type="button" class="btn btn-secondary" id="cancelAdminLoginButton">Cancel</button></div>
+            <div class="error-box" id="adminLoginError" role="alert"></div>
+          </form>
+          <div class="helper" style="margin-top:12px">First-use PIN: 2468. Change it in Admin settings before your first paid booking. This is a guest-facing screen lock, not strong security against someone inspecting the source code.</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="screen" id="adminScreen" aria-labelledby="adminScreenTitle">
+      <div class="admin-heading"><div><div class="eyebrow">Owner controls</div><h1 id="adminScreenTitle">Make it yours.</h1><p>Set up the next event, customise the photo layout, and choose the SD-card save folder here.</p></div><span class="tiny-tag">Admin mode unlocked</span></div>
+              <div class="panel">
+          <div class="panel-head">
+            <div><h2>Event and booth settings</h2><p>These settings are saved on this device and applied to the guest experience.</p></div>
+            <span class="tiny-tag">Admin</span>
+          </div>
+          <form id="settingsForm">
+            <div class="feature-panel">
+              <h3>Saved event profiles</h3><p>Save a complete setup for each booking and load it again later. Profiles stay in this browser on this HP.</p>
+              <div class="profile-controls">
+                <div class="field"><label for="profileSelect">PROFILE</label><select id="profileSelect"><option value="">Choose saved profile…</option></select></div>
+                <button type="button" class="btn btn-secondary" id="loadProfileButton">Load</button>
+                <button type="button" class="btn btn-secondary" id="saveProfileButton">Save as…</button>
+                <button type="button" class="btn btn-danger" id="deleteProfileButton">Delete</button>
+              </div><div class="helper" id="profileStatus" role="status" aria-live="polite" style="margin-top:8px">Your current event settings remain separate until you save them as a profile.</div>
+            </div>
+            <div class="field-grid">
+              <div class="field full">
+                <label for="businessName">YOUR BUSINESS NAME</label>
+                <input type="text" id="businessName" maxlength="42" placeholder="Enter your business name" value="Memory Booth">
+              </div>
+              <div class="field full">
+                <label for="eventName">EVENT TITLE</label>
+                <input type="text" id="eventName" maxlength="52" placeholder="e.g. The Wedding of Alex & Jamie" value="A Day to Remember">
+              </div>
+              <div class="field">
+                <label for="eventDate">EVENT DATE (OPTIONAL)</label>
+                <input type="date" id="eventDate">
+              </div>
+              <div class="field">
+                <label for="accentColor">ACCENT COLOUR</label>
+                <input type="color" id="accentColor" value="#b96f58" aria-label="Choose the photo strip accent colour">
+              </div>
+              <div class="field full">
+                <label for="stripStyle">PHOTO STRIP STYLE</label>
+                <select id="stripStyle">
+                  <option value="classic">Classic — warm ivory and clean borders</option>
+                  <option value="modern">Modern — dark and minimal</option>
+                  <option value="party">Party — bright and playful</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="stripLayout">PHOTO LAYOUT</label>
+                <select id="stripLayout">
+                  <option value="vertical">Vertical photo strip</option>
+                  <option value="grid">2 × 2 collage (for four photos)</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="countdownSeconds">COUNTDOWN</label>
+                <select id="countdownSeconds">
+                  <option value="1">1 second</option>
+                  <option value="2">2 seconds</option>
+                  <option value="3" selected>3 seconds</option>
+                  <option value="5">5 seconds</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="intervalSeconds">DELAY BETWEEN PHOTOS</label>
+                <select id="intervalSeconds">
+                  <option value="0">No extra delay</option>
+                  <option value="1" selected>1 second</option>
+                  <option value="2">2 seconds</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="photoFilter">STANDARD PHOTO FILTER</label>
+                <select id="photoFilter">
+                  <option value="none">Original — no filter</option><option value="vivid">Vivid</option><option value="bw">Black &amp; white</option><option value="warm">Warm vintage</option><option value="cool">Cool tone</option><option value="soft">Soft matte</option>
+                </select><div class="helper">Used for standard sessions. The Filter Mix mode below applies a separate filter to each of its four layout photos.</div>
+              </div>
+              <div class="field">
+                <label for="poseChallenges">POSE PROMPTS IN STANDARD SESSIONS</label>
+                <select id="poseChallenges"><option value="on">On — prompt every photo</option><option value="off">Off</option></select>
+                <div class="helper">Pose Challenge (key 2) always shows a random prompt. This setting controls prompts during the regular 1/4 sessions.</div>
+              </div>
+              <div class="field full">
+                <label>FILTER MIX — FILTER FOR EACH OF THE FOUR PHOTOS</label>
+                <div class="field-grid">
+                  <div class="field"><label for="filterShot1">PHOTO 1 FILTER</label><select id="filterShot1" class="filter-shot-select"><option value="none">Original</option><option value="vivid">Vivid</option><option value="bw">Black &amp; white</option><option value="warm">Warm vintage</option><option value="cool">Cool tone</option><option value="soft">Soft matte</option></select></div>
+                  <div class="field"><label for="filterShot2">PHOTO 2 FILTER</label><select id="filterShot2" class="filter-shot-select"><option value="none">Original</option><option value="vivid">Vivid</option><option value="bw">Black &amp; white</option><option value="warm">Warm vintage</option><option value="cool">Cool tone</option><option value="soft">Soft matte</option></select></div>
+                  <div class="field"><label for="filterShot3">PHOTO 3 FILTER</label><select id="filterShot3" class="filter-shot-select"><option value="none">Original</option><option value="vivid">Vivid</option><option value="bw">Black &amp; white</option><option value="warm">Warm vintage</option><option value="cool">Cool tone</option><option value="soft">Soft matte</option></select></div>
+                  <div class="field"><label for="filterShot4">PHOTO 4 FILTER</label><select id="filterShot4" class="filter-shot-select"><option value="none">Original</option><option value="vivid">Vivid</option><option value="bw">Black &amp; white</option><option value="warm">Warm vintage</option><option value="cool">Cool tone</option><option value="soft">Soft matte</option></select></div>
+                </div>
+                <div class="helper">Choose any combination in Host settings. Filter Mix (key 3) takes four photos and applies the selected filter to each photo in the final PNG layout. Original JPG captures are preserved on the SD card.</div>
+              </div>
+              <div class="field full">
+                <label for="brandLogo">BUSINESS LOGO (OPTIONAL)</label>
+                <input type="file" id="brandLogo" accept="image/png,image/jpeg,image/webp">
+                <div class="helper" id="logoStatus">Upload a small PNG or JPG to print it on the photo layout. The logo stays on this device.</div>
+              </div>
+              <div class="field full">
+                <label for="footerText">SHORT MESSAGE (OPTIONAL)</label>
+                <input type="text" id="footerText" maxlength="60" placeholder="e.g. Thanks for celebrating with us!" value="Thanks for being part of our story">
+                <div class="helper">Tip: You can update these details for every booking.</div>
+              </div>
+              <div class="field full section-break">
+                <strong>After-session screen</strong>
+                <small>After the photos are saved, this screen tells guests how to receive their photos and where to find your website. All text, timing and screen colours can be customised.</small>
+              </div>
+              <div class="field full">
+                <label for="finishScreenDuration">HOW LONG TO SHOW THE FINISH SCREEN</label>
+                <select id="finishScreenDuration">
+                  <option value="3">3 seconds</option>
+                  <option value="5" selected>5 seconds</option>
+                  <option value="8">8 seconds</option>
+                  <option value="10">10 seconds</option>
+                  <option value="15">15 seconds</option>
+                  <option value="20">20 seconds</option>
+                </select>
+              </div>
+              <div class="field full">
+                <label for="finishTitle">FINISH SCREEN HEADING</label>
+                <input type="text" id="finishTitle" maxlength="70" value="Thanks for making memories!" placeholder="e.g. Thanks for celebrating with us!">
+              </div>
+              <div class="field full">
+                <label for="finishMessage">PHOTO DELIVERY INSTRUCTIONS</label>
+                <textarea id="finishMessage" maxlength="320" rows="3" placeholder="Tell guests where and how they can get their photos.">Please ask the host how to receive your photo copies.</textarea>
+              </div>
+              <div class="field">
+                <label for="finishWebsiteLabel">WEBSITE HEADING</label>
+                <input type="text" id="finishWebsiteLabel" maxlength="42" value="VISIT OUR WEBSITE" placeholder="e.g. Find us online">
+              </div>
+              <div class="field">
+                <label for="finishWebsiteUrl">YOUR WEBSITE ADDRESS</label>
+                <input type="text" id="finishWebsiteUrl" maxlength="160" value="" placeholder="www.yourwebsite.co.za">
+                <div class="helper">Leave blank to hide the website section on the finish screen.</div>
+              </div>
+              <div class="field">
+                <label for="finishBackgroundColor">FINISH SCREEN BACKGROUND</label>
+                <input type="color" id="finishBackgroundColor" value="#23211f" aria-label="Choose finish screen background colour">
+              </div>
+              <div class="field">
+                <label for="finishTextColor">FINISH SCREEN TEXT COLOUR</label>
+                <input type="color" id="finishTextColor" value="#fffaf4" aria-label="Choose finish screen text colour">
+              </div>
+              <div class="field full">
+                <div class="helper">Your existing business name, event title, accent colour and optional logo are also used on the finish screen. The timer starts after the automatic SD-card save attempt finishes.</div>
+              </div>
+              <div class="field full section-break"><strong>Storage monitor</strong><small>Check the selected SD-card folder and this app's browser storage before events.</small></div>
+              <div class="field full">
+                <div class="feature-panel" style="margin:0">
+                  <div class="storage-grid">
+                    <div class="storage-stat"><strong id="sdFileCount">—</strong>Files found in selected folder</div>
+                    <div class="storage-stat"><strong id="sdDataSize">—</strong>Folder data size scanned</div>
+                    <div class="storage-stat"><strong id="browserStorageUsage">—</strong>Browser storage used</div>
+                    <div class="storage-stat"><strong id="browserStorageQuota">—</strong>Browser storage estimate</div>
+                  </div><div class="storage-meter"><span id="browserStorageBar"></span></div>
+                  <div class="helper" id="storageMonitorStatus" role="status" aria-live="polite">Choose an SD-card folder, then refresh the monitor.</div>
+                  <div class="btn-row"><button type="button" class="btn btn-secondary" id="refreshStorageButton">Refresh storage check</button></div>
+                  <p class="feature-note">Important: browsers cannot reliably report the SD card's remaining free space. The folder scan reports existing files, and the browser quota is for app data only. Always test saving and keep a backup card.</p>
+                </div>
+              </div>
+              <div class="field full">
+                <label>PHOTO SAVE LOCATION</label>
+                <div class="save-location-row">
+                  <button type="button" class="btn btn-secondary" id="chooseSaveFolderButton">Choose SD card folder</button>
+                  <span class="save-location-status" id="saveFolderStatus" role="status" aria-live="polite">No folder selected. Choose a folder on your SD card before starting.</span>
+                </div>
+                <div class="helper">In the folder picker, choose a folder on your SD card. The app creates an event subfolder and saves original JPGs plus the finished PNG here.</div>
+              </div>
+            </div>
+            <div class="btn-row">
+              <button type="submit" class="btn btn-primary" id="startButton">Save event settings</button>
+            </div>
+            <div class="error-box" id="adminSettingsError" role="alert"></div>
+            <div class="privacy-note">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-11V5l-8-3-8 3v6c0 7 8 11 8 11Z"/><path d="m9 12 2 2 4-4"/></svg>
+              <span>Photos are processed in your browser and are not uploaded. After you choose a folder, originals and the finished layout are saved directly to it.</span>
+            </div>
+          </form>
+
+        <div class="admin-pin-box">
+          <div class="panel-head"><div><h2>Administrator PIN</h2><p>Change the default PIN before using the booth at public events.</p></div></div>
+          <div class="field-grid">
+            <div class="field"><label for="currentAdminPin">CURRENT PIN</label><input type="password" id="currentAdminPin" inputmode="numeric" autocomplete="current-password" maxlength="12" placeholder="Current PIN"></div>
+            <div class="field"><label for="newAdminPin">NEW PIN (4–12 DIGITS)</label><input type="password" id="newAdminPin" inputmode="numeric" autocomplete="new-password" maxlength="12" placeholder="New PIN"></div>
+            <div class="field full"><label for="confirmAdminPin">CONFIRM NEW PIN</label><input type="password" id="confirmAdminPin" inputmode="numeric" autocomplete="new-password" maxlength="12" placeholder="Repeat new PIN"></div>
+          </div>
+          <div class="btn-row"><button type="button" class="btn btn-secondary" id="changePinButton">Change admin PIN</button><span class="save-location-status" id="pinStatus" role="status" aria-live="polite">First-use PIN: 2468. Change it before handing the booth to guests.</span></div>
+        </div>
+        <div class="btn-row"><button type="button" class="btn btn-secondary" id="exitAdminButton">Save and return to guest screen</button></div>
+        </div>
+    </section>
+
+    <section class="screen" id="captureScreen" aria-labelledby="captureTitle">
+      <div class="capture-header">
+        <div><div class="eyebrow" id="captureEyebrow">Let's make some memories</div><h1 id="captureTitle">Get camera-ready.</h1><p id="captureSubtitle">Look at the camera and get ready to smile.</p></div>
+        <div class="counter-chip" id="shotCounter">PHOTO 0 OF 4</div>
+      </div>
+      <div class="capture-grid">
+        <div class="camera-card" id="cameraCard">
+          <video id="cameraVideo" autoplay playsinline muted></video>
+          <div class="camera-placeholder" id="cameraPlaceholder">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="6" width="18" height="14" rx="3"/><path d="m8 6 1.5-2h5L16 6"/><circle cx="12" cy="13" r="4"/></svg>
+            <strong>Camera getting ready</strong><span>Allow camera access in Chrome when asked. Your photos stay on this device.</span>
+          </div>
+          <div class="camera-topline"><span class="camera-label" id="eventCameraLabel">PHOTO BOOTH</span><span class="camera-label">LIVE PREVIEW</span></div>
+          <div class="countdown-overlay" id="countdownOverlay" aria-live="assertive">3</div>
+          <div class="pose-banner hidden" id="poseBanner" aria-live="polite"></div>
+        </div>
+        <aside class="side-panel">
+          <div class="status-card">
+            <div class="status-title"><h3 id="statusTitle">Ready when you are</h3><span class="status-num" id="statusNum">01 / 04</span></div>
+            <div class="status-message" id="statusMessage">Your first photo is coming up. You will have a short countdown before each shot.</div>
+            <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+            <div class="progress-label"><span>SESSION PROGRESS</span><span id="progressText">0%</span></div>
+            <div class="btn-row"><button class="btn btn-danger" id="cancelSessionButton" type="button">Cancel session</button></div>
+          </div>
+          <div class="shots-card">
+            <div class="status-title"><h3>Your photo strip</h3><span class="tiny-tag">4 shots</span></div>
+            <p style="font-size:11px;margin:0;">Each photo appears here as it is captured.</p>
+            <div class="shots-grid" id="shotsGrid">
+              <div class="shot-slot"><span class="slot-number">1</span>Waiting</div>
+              <div class="shot-slot"><span class="slot-number">2</span>Waiting</div>
+              <div class="shot-slot"><span class="slot-number">3</span>Waiting</div>
+              <div class="shot-slot"><span class="slot-number">4</span>Waiting</div>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <section class="screen" id="captureReviewScreen" aria-labelledby="captureReviewTitle">
+      <div class="preview-shell">
+        <div class="preview-copy"><div class="eyebrow">Quick photo check</div><h1 id="captureReviewTitle">Love these shots?</h1><p>Review your layout before it is saved as the finished keepsake. You can retake the full set if anyone blinked or wants another pose.</p>
+          <div class="review-details"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-11V5l-8-3-8 3v6c0 7 8 11 8 11Z"/><path d="m9 12 2 2 4-4"/></svg><span id="captureReviewNote">Your original captures are saved to the selected SD-card folder as you go. Retaking replaces the current session's numbered JPGs.</span></div>
+          <div class="preview-actions"><button type="button" class="btn btn-primary" id="keepPhotosButton">Keep these photos</button><button type="button" class="btn btn-secondary" id="retakePhotosButton">Retake full set</button><button type="button" class="btn btn-soft" id="cancelReviewButton">Cancel session</button></div>
+        </div><div class="preview-image"><img id="captureReviewPreview" alt="Preview of your photo booth layout"></div>
+      </div>
+    </section>
+
+    <section class="screen" id="completionScreen" aria-labelledby="completionTitle">
+      <div class="completion-shell">
+        <div class="completion-card" id="completionCard">
+          <img class="completion-logo hidden" id="completionLogo" alt="Business logo">
+          <div class="completion-event" id="completionEvent">MEMORY BOOTH · YOUR EVENT</div>
+          <h1 id="completionTitle">Thanks for making memories!</h1>
+          <p class="completion-message" id="completionMessage">Please ask the host how to receive your photo copies.</p>
+          <div class="completion-save-status" id="completionSaveStatus" role="status" aria-live="polite">Saving your photos to the SD card…</div>
+          <div class="completion-website hidden" id="completionWebsiteGroup">
+            <div class="completion-website-label" id="completionWebsiteLabel">VISIT OUR WEBSITE</div>
+            <div class="completion-website-url" id="completionWebsiteUrl">www.yourwebsite.co.za</div>
+          </div>
+          <div class="completion-timer"><span>Returning to start in</span><strong id="completionTimerText">5</strong><span>seconds</span></div>
+          <div class="completion-track" aria-hidden="true"><div class="completion-progress" id="completionProgress"></div></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="screen" id="reviewScreen" aria-labelledby="reviewTitle">
+      <div class="review-grid">
+        <div class="review-copy">
+          <div class="eyebrow">That's a keeper</div>
+          <h1 id="reviewTitle">Your memories,<br>ready to keep.</h1>
+          <p id="reviewDescription">Your photos are ready. The host can save them to the event SD card. Want another set? Start a new session.</p>
+          <div class="review-details"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-11V5l-8-3-8 3v6c0 7 8 11 8 11Z"/><path d="m9 12 2 2 4-4"/></svg><span id="reviewSaveStatus">Saving photos directly to your selected SD card folder.</span></div>
+          <div class="review-actions">
+            <button class="btn btn-primary" id="downloadButton" type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12m-5-5 5 5 5-5"/><path d="M5 17v4h14v-4"/></svg> Save / retry SD card save</button>
+            <button class="btn btn-secondary" id="reviewChooseFolderButton" type="button">Change save folder</button>
+            <button class="btn btn-secondary" id="newSessionButton" type="button">New session</button>
+            <button class="btn btn-soft" id="backToWelcomeButton" type="button">Change event</button>
+          </div>
+          <div class="helper" style="margin-top:13px;">Original captures are saved as JPG files and the designed layout as a PNG in the event folder on your SD card. Use the button above to retry saving if the card was disconnected.</div>
+        </div>
+        <div class="strip-stage"><img id="stripPreview" alt="Your generated photo layout preview"></div>
+      </div>
+    </section>
+  </main>
+  <footer class="footer">MADE FOR <strong id="footerBrand">YOUR NEXT EVENT</strong> · CUSTOM EVENT PHOTO BOOTH <button type="button" id="adminButton" class="admin-access-btn">Host settings</button></footer>
+</div>
+
+<canvas id="captureCanvas" class="hidden"></canvas>
+<script>
+// Memory Booth v5: keyboard 2 pose challenge; keyboard 3 four-photo admin-selected filter mix.
+(() => {
+  'use strict';
+
+  const $ = (id) => document.getElementById(id);
+  const screens = ['welcomeScreen', 'adminLoginScreen', 'adminScreen', 'captureScreen', 'captureReviewScreen', 'completionScreen', 'reviewScreen'];
+  const form = $('settingsForm');
+  const video = $('cameraVideo');
+  const canvas = $('captureCanvas');
+  const ctx = canvas.getContext('2d');
+  const capturePhotos = [];
+  let cameraStream = null;
+  let sessionToken = 0;
+  let busy = false;
+  let startingSession = false;
+  let finalStripDataUrl = '';
+  let currentSettings = {};
+  let saveDirectoryHandle = null;
+  let eventDirectoryHandle = null;
+  let currentSessionPrefix = '';
+  let savedPhotoIndexes = new Set();
+  let stripSavedToCard = false;
+  let savingInProgress = false;
+  let sessionPhotoCount = 4;
+  let currentSessionMode = 'standard';
+  let adminUnlocked = false;
+  let brandLogoDataUrl = '';
+  const DEFAULT_ADMIN_PIN = '2468';
+
+  const icons = {
+    play: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg>'
+  };
+
+  function showScreen(id) {
+    screens.forEach(screenId => $(screenId).classList.toggle('active', screenId === id));
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function escapeText(text) {
+    return String(text || '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+  }
+
+  function getSettings() {
+    const settings = {
+      businessName: $('businessName').value.trim() || 'Memory Booth',
+      eventName: $('eventName').value.trim() || 'A Day to Remember',
+      eventDate: $('eventDate').value,
+      accentColor: $('accentColor').value || '#b96f58',
+      stripStyle: $('stripStyle').value || 'classic',
+      stripLayout: $('stripLayout').value || 'vertical',
+      countdownSeconds: Number($('countdownSeconds').value || 3),
+      intervalSeconds: Number($('intervalSeconds').value || 1),
+      photoFilter: $('photoFilter').value || 'none',
+      photoFilters: [1,2,3,4].map(n => $(`filterShot${n}`).value || 'none'),
+      poseChallenges: $('poseChallenges').value || 'on',
+      footerText: $('footerText').value.trim(),
+      finishScreenDuration: Number($('finishScreenDuration').value || 5),
+      finishTitle: $('finishTitle').value.trim() || 'Thanks for making memories!',
+      finishMessage: $('finishMessage').value.trim() || 'Please ask the host how to receive your photos.',
+      finishWebsiteLabel: $('finishWebsiteLabel').value.trim() || 'VISIT OUR WEBSITE',
+      finishWebsiteUrl: $('finishWebsiteUrl').value.trim(),
+      finishBackgroundColor: $('finishBackgroundColor').value || '#23211f',
+      finishTextColor: $('finishTextColor').value || '#fffaf4',
+      brandLogoDataUrl
+    };
+    return settings;
+  }
+
+  function applyBranding(settings) {
+    document.documentElement.style.setProperty('--accent', settings.accentColor);
+    document.documentElement.style.setProperty('--accent-dark', shadeColor(settings.accentColor, -25));
+    $('topBrand').textContent = settings.businessName;
+    $('footerBrand').textContent = settings.businessName.toUpperCase();
+    $('eventCameraLabel').textContent = settings.eventName.toUpperCase();
+    $('guestEventTitle').textContent = settings.eventName || 'Welcome to our event';
+    $('guestEventSubtitle').textContent = settings.eventDate ? `Choose a photo experience · ${new Date(`${settings.eventDate}T12:00:00`).toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'})}` : 'Choose your photo experience to begin.';
+    $('completionEvent').textContent = `${settings.businessName || 'Memory Booth'}${settings.eventName ? ' · ' + settings.eventName : ''}`;
+    $('completionTitle').textContent = settings.finishTitle || 'Thanks for making memories!';
+    $('completionMessage').textContent = settings.finishMessage || 'Please ask the host how to receive your photos.';
+    $('completionWebsiteLabel').textContent = settings.finishWebsiteLabel || 'VISIT OUR WEBSITE';
+    $('completionWebsiteUrl').textContent = settings.finishWebsiteUrl || '';
+    $('completionWebsiteGroup').classList.toggle('hidden', !settings.finishWebsiteUrl);
+    $('completionCard').style.setProperty('--finish-bg', settings.finishBackgroundColor || '#23211f');
+    $('completionCard').style.setProperty('--finish-text', settings.finishTextColor || '#fffaf4');
+    const completionLogo = $('completionLogo');
+    if (settings.brandLogoDataUrl) {
+      completionLogo.src = settings.brandLogoDataUrl;
+      completionLogo.classList.remove('hidden');
+    } else {
+      completionLogo.removeAttribute('src');
+      completionLogo.classList.add('hidden');
+    }
+  }
+
+  function filterCss(name) {
+    return ({none:'none',vivid:'contrast(1.12) saturate(1.35)',bw:'grayscale(1) contrast(1.08)',warm:'sepia(.28) saturate(1.18) contrast(1.03)',cool:'saturate(.92) hue-rotate(8deg) contrast(1.04)',soft:'brightness(1.05) contrast(.9) saturate(.86)'})[name] || 'none';
+  }
+  function applyCameraFilter(name) {
+    if (video) video.style.filter = filterCss(name);
+    document.querySelectorAll('#shotsGrid img').forEach(img => { img.style.filter = filterCss(name); });
+  }
+  function shadeColor(hex, percent) {
+    const raw = hex.replace('#','');
+    if (!/^[0-9a-f]{6}$/i.test(raw)) return '#87503f';
+    const num = parseInt(raw, 16);
+    const amt = Math.round(2.55 * percent);
+    const r = Math.min(255, Math.max(0, (num >> 16) + amt));
+    const g = Math.min(255, Math.max(0, ((num >> 8) & 0x00FF) + amt));
+    const b = Math.min(255, Math.max(0, (num & 0x0000FF) + amt));
+    return '#' + (0x1000000 + r * 0x10000 + g * 0x100 + b).toString(16).slice(1);
+  }
+
+  function saveSettings() {
+    currentSettings = getSettings();
+    applyBranding(currentSettings);
+    applyCameraFilter(currentSettings.photoFilter || 'none');
+    try { localStorage.setItem('memoryBoothSettings', JSON.stringify(currentSettings)); } catch (_) { /* storage may be disabled */ }
+  }
+
+  function loadSettings() {
+    try {
+      const saved = JSON.parse(localStorage.getItem('memoryBoothSettings') || 'null');
+      if (saved && typeof saved === 'object') {
+        if (saved.businessName) $('businessName').value = saved.businessName;
+        if (saved.eventName) $('eventName').value = saved.eventName;
+        if (saved.eventDate) $('eventDate').value = saved.eventDate;
+        if (saved.accentColor && /^#[0-9a-f]{6}$/i.test(saved.accentColor)) $('accentColor').value = saved.accentColor;
+        if (['classic','modern','party'].includes(saved.stripStyle)) $('stripStyle').value = saved.stripStyle;
+        if (['vertical','grid'].includes(saved.stripLayout)) $('stripLayout').value = saved.stripLayout;
+        if ([1,2,3,5].includes(Number(saved.countdownSeconds))) $('countdownSeconds').value = String(saved.countdownSeconds);
+        if ([0,1,2].includes(Number(saved.intervalSeconds))) $('intervalSeconds').value = String(saved.intervalSeconds);
+        if (['none','vivid','bw','warm','cool','soft'].includes(saved.photoFilter)) $('photoFilter').value = saved.photoFilter;
+        if (Array.isArray(saved.photoFilters)) saved.photoFilters.slice(0,4).forEach((filter, index) => {
+          if (['none','vivid','bw','warm','cool','soft'].includes(filter)) $(`filterShot${index + 1}`).value = filter;
+        });
+        if (['on','off'].includes(saved.poseChallenges)) $('poseChallenges').value = saved.poseChallenges;
+        if (typeof saved.footerText === 'string') $('footerText').value = saved.footerText;
+        if ([3,5,8,10,15,20].includes(Number(saved.finishScreenDuration))) $('finishScreenDuration').value = String(saved.finishScreenDuration);
+        if (typeof saved.finishTitle === 'string') $('finishTitle').value = saved.finishTitle;
+        if (typeof saved.finishMessage === 'string') $('finishMessage').value = saved.finishMessage;
+        if (typeof saved.finishWebsiteLabel === 'string') $('finishWebsiteLabel').value = saved.finishWebsiteLabel;
+        if (typeof saved.finishWebsiteUrl === 'string') $('finishWebsiteUrl').value = saved.finishWebsiteUrl;
+        if (typeof saved.finishBackgroundColor === 'string' && /^#[0-9a-f]{6}$/i.test(saved.finishBackgroundColor)) $('finishBackgroundColor').value = saved.finishBackgroundColor;
+        if (typeof saved.finishTextColor === 'string' && /^#[0-9a-f]{6}$/i.test(saved.finishTextColor)) $('finishTextColor').value = saved.finishTextColor;
+        if (typeof saved.brandLogoDataUrl === 'string' && saved.brandLogoDataUrl.startsWith('data:image/')) brandLogoDataUrl = saved.brandLogoDataUrl;
+      }
+    } catch (_) { /* start with defaults */ }
+    saveSettings();
+    $('logoStatus').textContent = brandLogoDataUrl ? 'A business logo is saved on this device and will appear on the photo layout.' : 'Upload a small PNG or JPG to print it on the photo layout. The logo stays on this device.';
+  }
+
+  function setWelcomeError(message) {
+    const box = $('welcomeError');
+    box.textContent = message;
+    box.classList.toggle('show', Boolean(message));
+  }
+
+  async function startCamera() {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      throw new Error('This page cannot access the camera from its current browser context. Try opening the HTML file directly in Chrome. If that fails, run it from HTTPS hosting or http://localhost.');
+    }
+    stopCamera();
+    const constraints = { audio: false, video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } } };
+    try {
+      cameraStream = await navigator.mediaDevices.getUserMedia(constraints);
+    } catch (firstError) {
+      // Some external webcams do not report a usable facingMode; retry with a generic video constraint.
+      try {
+        cameraStream = await navigator.mediaDevices.getUserMedia({ audio: false, video: true });
+      } catch (secondError) {
+        throw secondError || firstError;
+      }
+    }
+    video.srcObject = cameraStream;
+    await new Promise((resolve) => {
+      if (video.readyState >= 2) return resolve();
+      const done = () => { video.removeEventListener('loadeddata', done); resolve(); };
+      video.addEventListener('loadeddata', done, { once: true });
+      setTimeout(resolve, 2500);
+    });
+    try { await video.play(); } catch (_) { /* autoplay may already be active */ }
+    $('cameraPlaceholder').classList.add('hidden');
+  }
+
+  function stopCamera() {
+    if (cameraStream) {
+      cameraStream.getTracks().forEach(track => track.stop());
+      cameraStream = null;
+    }
+    video.srcObject = null;
+    $('cameraPlaceholder').classList.remove('hidden');
+  }
+
+  function wait(ms, token) {
+    return new Promise(resolve => {
+      const started = Date.now();
+      const tick = () => {
+        if (token !== sessionToken) return resolve(false);
+        if (Date.now() - started >= ms) return resolve(true);
+        setTimeout(tick, Math.min(80, ms));
+      };
+      tick();
+    });
+  }
+
+  function drawPhotoToCanvas(image, targetCtx, x, y, width, height, mirror = false) {
+    const sw = image.videoWidth || image.naturalWidth || image.width;
+    const sh = image.videoHeight || image.naturalHeight || image.height;
+    if (!sw || !sh) return;
+    const targetRatio = width / height;
+    const sourceRatio = sw / sh;
+    let sx = 0, sy = 0, sWidth = sw, sHeight = sh;
+    if (sourceRatio > targetRatio) {
+      sWidth = sh * targetRatio;
+      sx = (sw - sWidth) / 2;
+    } else {
+      sHeight = sw / targetRatio;
+      sy = (sh - sHeight) / 2;
+    }
+    if (mirror) {
+      targetCtx.save();
+      targetCtx.translate(x + width, y);
+      targetCtx.scale(-1, 1);
+      targetCtx.drawImage(image, sx, sy, sWidth, sHeight, 0, 0, width, height);
+      targetCtx.restore();
+    } else {
+      targetCtx.drawImage(image, sx, sy, sWidth, sHeight, x, y, width, height);
+    }
+  }
+
+  function flashCamera() {
+    $('cameraCard').classList.remove('flash');
+    // Trigger animation restart.
+    void $('cameraCard').offsetWidth;
+    $('cameraCard').classList.add('flash');
+  }
+
+  function resetShotSlots(count = sessionPhotoCount) {
+    $('shotsGrid').innerHTML = Array.from({length: count}, (_, index) => index + 1).map(i => `<div class="shot-slot"><span class="slot-number">${i}</span>Waiting</div>`).join('');
+    $('shotsGrid').style.gridTemplateColumns = count === 1 ? '1fr' : 'repeat(2,1fr)';
+    capturePhotos.length = 0;
+    $('shotCounter').textContent = `PHOTO 0 OF ${count}`;
+    $('progressFill').style.width = '0%';
+    $('progressText').textContent = '0%';
+    const tag = document.querySelector('.shots-card .tiny-tag');
+    if (tag) tag.textContent = `${count} shot${count === 1 ? '' : 's'}`;
+  }
+
+  function showCapturedPhoto(index, dataUrl, filterName = currentSettings.photoFilter || 'none') {
+    const slot = $('shotsGrid').children[index];
+    if (!slot) return;
+    slot.innerHTML = `<span class="slot-number">${index + 1}</span><img src="${dataUrl}" alt="Captured photo ${index + 1}" style="filter:${filterCss(filterName)}">`;
+  }
+
+  const POSE_CHALLENGES = [
+    'Strike your best red-carpet pose!', 'Everyone point at the guest of honour!', 'Make your funniest face!',
+    'Do a tiny dance move!', 'Show your best model look!', 'Make a heart with your hands!',
+    'Give us your biggest celebration cheer!', 'Try a dramatic movie-poster pose!', 'Everyone look in a different direction!',
+    'Show off your best serious face!', 'Throw a peace sign!', 'Make the group look like a band photo!'
+  ];
+  let lastPoseChallenge = '';
+  function choosePoseChallenge() {
+    let prompt = POSE_CHALLENGES[Math.floor(Math.random() * POSE_CHALLENGES.length)];
+    if (POSE_CHALLENGES.length > 1 && prompt === lastPoseChallenge) prompt = POSE_CHALLENGES[(POSE_CHALLENGES.indexOf(prompt) + 1) % POSE_CHALLENGES.length];
+    lastPoseChallenge = prompt;
+    return prompt;
+  }
+
+  async function runCaptureSession() {
+    if (busy) return;
+    busy = true;
+    const token = ++sessionToken;
+    resetShotSlots(sessionPhotoCount);
+    const total = sessionPhotoCount;
+    const countdownSeconds = Math.max(1, Math.min(5, Number(currentSettings.countdownSeconds || 3)));
+    const intervalSeconds = Math.max(0, Math.min(2, Number(currentSettings.intervalSeconds ?? 1)));
+    $('statusTitle').textContent = 'Get camera-ready';
+    $('statusMessage').textContent = total === 1 ? 'Look at the camera. One photo is coming up.' : 'Look at the camera. A countdown starts before each photo.';
+    $('statusNum').textContent = `01 / ${String(total).padStart(2,'0')}`;
+    $('captureSubtitle').textContent = total === 1 ? 'One photo. One great memory.' : 'Four poses. One great keepsake.';
+    $('countdownOverlay').classList.remove('show');
+    $('cancelSessionButton').disabled = false;
+    $('cancelSessionButton').textContent = 'Cancel session';
+
+    try {
+      for (let i = 0; i < total; i++) {
+        if (token !== sessionToken) return;
+        $('statusTitle').textContent = total === 1 ? 'Your photo' : `Photo ${i + 1} of ${total}`;
+        $('statusNum').textContent = `${String(i + 1).padStart(2,'0')} / ${String(total).padStart(2,'0')}`;
+        $('captureSubtitle').textContent = total === 1 ? 'Your photo is up next.' : (i === 0 ? 'Your first photo is up next.' : `Photo ${i + 1} is up next — keep those smiles ready!`);
+        const poseBanner = $('poseBanner');
+        const shouldShowPose = currentSessionMode === 'pose' || (currentSessionMode !== 'filters' && currentSettings.poseChallenges !== 'off');
+        if (shouldShowPose) { poseBanner.textContent = choosePoseChallenge(); poseBanner.classList.remove('hidden'); } else { poseBanner.classList.add('hidden'); }
+        const shotFilter = currentSessionMode === 'filters' ? ((currentSettings.photoFilters || [])[i] || 'none') : (currentSettings.photoFilter || 'none');
+        applyCameraFilter(shotFilter);
+        for (let count = countdownSeconds; count >= 1; count--) {
+          if (token !== sessionToken) return;
+          $('countdownOverlay').textContent = count;
+          $('countdownOverlay').classList.add('show');
+          $('statusMessage').textContent = `Photo ${i + 1} is coming in ${count}…`;
+          const completed = await wait(900, token);
+          if (!completed) return;
+        }
+        $('countdownOverlay').textContent = '✦';
+        flashCamera();
+        const shotCanvas = document.createElement('canvas');
+        const sourceWidth = video.videoWidth || 1280;
+        const sourceHeight = video.videoHeight || 720;
+        shotCanvas.width = Math.min(sourceWidth, 1600);
+        shotCanvas.height = Math.round(shotCanvas.width * (sourceHeight / sourceWidth));
+        const shotCtx = shotCanvas.getContext('2d');
+        drawPhotoToCanvas(video, shotCtx, 0, 0, shotCanvas.width, shotCanvas.height, true);
+        const dataUrl = shotCanvas.toDataURL('image/jpeg', 0.92);
+        capturePhotos.push(dataUrl);
+        showCapturedPhoto(i, dataUrl, shotFilter);
+        const photoSave = await saveCapturedPhotoToCard(i, dataUrl);
+        $('shotCounter').textContent = `PHOTO ${i + 1} OF ${total}`;
+        const percent = Math.round(((i + 1) / total) * 100);
+        $('progressFill').style.width = `${percent}%`;
+        $('progressText').textContent = `${percent}%`;
+        $('statusMessage').textContent = i < total - 1
+          ? (photoSave.ok ? `Photo ${i + 1} saved. Get ready for the next one.` : `Photo ${i + 1} was captured but not saved. Get ready for the next one.`)
+          : (photoSave.ok ? 'All photos captured and saved. Preparing your layout…' : 'All photos captured. Preparing your layout…');
+        if (i < total - 1 && intervalSeconds > 0) {
+          const completed = await wait(intervalSeconds * 1000, token);
+          if (!completed) return;
+        }
+      }
+      if (token !== sessionToken) return;
+      $('countdownOverlay').classList.remove('show');
+      $('poseBanner').classList.add('hidden');
+      stopCamera();
+      finalStripDataUrl = await createPhotoStrip(currentSettings, capturePhotos.slice());
+      $('captureReviewPreview').src = finalStripDataUrl;
+      $('captureReviewScreen').dataset.total = String(total);
+      showScreen('captureReviewScreen');
+      return;
+    } catch (error) {
+      if (token !== sessionToken) return;
+      busy = false;
+      stopCamera();
+      showScreen('welcomeScreen');
+      setWelcomeError(readableCameraError(error));
+    } finally {
+      if (token === sessionToken) busy = false;
+    }
+  }
+
+  async function finalizeCapturedSession() {
+    if (!finalStripDataUrl || !capturePhotos.length) return;
+    const token = sessionToken;
+    const total = capturePhotos.length;
+    $('stripPreview').src = finalStripDataUrl;
+    $('reviewTitle').innerHTML = total === 1 ? 'Your photo,<br>ready to keep.' : 'Your memories,<br>ready to keep.';
+    $('reviewDescription').textContent = total === 1 ? 'Your single photo has been captured.' : 'Your four-photo layout has been captured.';
+    $('stripPreview').alt = total === 1 ? 'Your generated single-photo layout preview' : 'Your generated four-photo layout preview';
+    applyBranding(currentSettings);
+    $('completionSaveStatus').textContent = 'Saving your photos to the SD card…';
+    $('completionSaveStatus').classList.remove('error');
+    showScreen('completionScreen');
+    try { await saveSessionFilesToCard(); }
+    catch (saveError) {
+      $('completionSaveStatus').textContent = `Photos could not be fully saved: ${saveError && saveError.message ? saveError.message : 'unknown error'}. Please alert the host.`;
+      $('completionSaveStatus').classList.add('error');
+    }
+    if (token !== sessionToken) return;
+    await runCompletionTimer(token, Math.max(3, Math.min(20, Number(currentSettings.finishScreenDuration || 5))));
+  }
+
+  function readableCameraError(error) {
+    const name = error && error.name;
+    if (name === 'NotAllowedError' || name === 'PermissionDeniedError') return 'Camera access was blocked. In Chrome, select the camera/permissions icon near the address bar and allow camera access, then try again.';
+    if (name === 'NotFoundError' || name === 'DevicesNotFoundError') return 'No camera was found. Check that your webcam is connected, then try again.';
+    if (name === 'NotReadableError' || name === 'TrackStartError') return 'The camera may already be in use by another app or tab. Close other apps using the camera and try again.';
+    if (name === 'OverconstrainedError') return 'The camera could not use the requested settings. Try a different webcam.';
+    return `The camera could not start${error && error.message ? ': ' + error.message : '. Check Chrome camera permissions and try again.'}`;
+  }
+
+  function roundedRect(context, x, y, width, height, radius) {
+    const r = Math.min(radius, width / 2, height / 2);
+    context.beginPath();
+    context.moveTo(x + r, y);
+    context.arcTo(x + width, y, x + width, y + height, r);
+    context.arcTo(x + width, y + height, x, y + height, r);
+    context.arcTo(x, y + height, x, y, r);
+    context.arcTo(x, y, x + width, y, r);
+    context.closePath();
+  }
+
+  function wrapCanvasText(context, text, x, y, maxWidth, lineHeight, maxLines = 2) {
+    const words = String(text || '').split(/\s+/).filter(Boolean);
+    const lines = [];
+    let line = '';
+    for (const word of words) {
+      const test = line ? `${line} ${word}` : word;
+      if (context.measureText(test).width > maxWidth && line) {
+        lines.push(line);
+        line = word;
+      } else line = test;
+    }
+    if (line) lines.push(line);
+    const shown = lines.slice(0, maxLines);
+    shown.forEach((value, i) => context.fillText(value, x, y + i * lineHeight));
+    return shown.length;
+  }
+
+  function loadImage(src) {
+    return new Promise((resolve, reject) => {
+      const image = new Image();
+      image.onload = () => resolve(image);
+      image.onerror = reject;
+      image.src = src;
+    });
+  }
+
+  async function createPhotoStrip(settings, photos) {
+    const width = 720;
+    const padding = 36;
+    const photoWidth = width - padding * 2;
+    const photoGap = 17;
+    const headerHeight = 238;
+    const footerHeight = 210;
+    const useGrid = settings.stripLayout === 'grid' && photos.length > 1;
+    const columns = useGrid ? 2 : 1;
+    const rows = useGrid ? Math.ceil(photos.length / 2) : photos.length;
+    const cellWidth = useGrid ? (photoWidth - photoGap) / 2 : photoWidth;
+    const photoHeight = useGrid ? 300 : 350;
+    const height = padding + headerHeight + rows * photoHeight + Math.max(0, rows - 1) * photoGap + footerHeight;
+    const strip = document.createElement('canvas');
+    strip.width = width;
+    strip.height = height;
+    const c = strip.getContext('2d');
+    const isModern = settings.stripStyle === 'modern';
+    const isParty = settings.stripStyle === 'party';
+    const background = isModern ? '#222321' : isParty ? '#fff6fa' : '#fffdf8';
+    const textColor = isModern ? '#f6f2eb' : '#332e2a';
+    const subColor = isModern ? '#d0c9bf' : '#85766c';
+    const borderColor = settings.accentColor;
+    c.fillStyle = background;
+    c.fillRect(0, 0, width, height);
+
+    // Soft framing and tiny corner details.
+    c.strokeStyle = borderColor;
+    c.lineWidth = isModern ? 4 : 3;
+    c.strokeRect(13, 13, width - 26, height - 26);
+    if (isParty) {
+      c.fillStyle = settings.accentColor;
+      c.globalAlpha = .12;
+      c.fillRect(14, 14, width - 28, 12);
+      c.globalAlpha = 1;
+    }
+
+    c.textAlign = 'center';
+    c.fillStyle = borderColor;
+    c.font = '800 19px Arial, sans-serif';
+    c.fillText((settings.businessName || 'Memory Booth').toUpperCase().slice(0, 36), width/2, 66);
+    if (settings.brandLogoDataUrl) {
+      try {
+        const logo = await loadImage(settings.brandLogoDataUrl);
+        const maxW = 120, maxH = 74;
+        const scale = Math.min(maxW / logo.naturalWidth, maxH / logo.naturalHeight, 1);
+        c.drawImage(logo, width / 2 - logo.naturalWidth * scale / 2, 82, logo.naturalWidth * scale, logo.naturalHeight * scale);
+      } catch (_) { /* An invalid or removed logo must not stop a session. */ }
+    }
+
+    c.fillStyle = textColor;
+    c.font = '500 36px Georgia, serif';
+    const title = settings.eventName || 'A Day to Remember';
+    const titleY = settings.brandLogoDataUrl ? 158 : 117;
+    const titleLines = wrapCanvasText(c, title, width/2, titleY, width - 95, 42, 2);
+    c.fillStyle = subColor;
+    c.font = '600 15px Arial, sans-serif';
+    const dateString = settings.eventDate ? new Date(`${settings.eventDate}T12:00:00`).toLocaleDateString(undefined, { year:'numeric', month:'long', day:'numeric' }) : '';
+    c.fillText(dateString, width/2, titleY + Math.max(1, titleLines) * 40 + 10);
+
+    const images = await Promise.all(photos.map(loadImage));
+    const photosStartY = padding + headerHeight;
+    images.forEach((image, index) => {
+      const col = useGrid ? index % columns : 0;
+      const row = useGrid ? Math.floor(index / columns) : index;
+      const x = padding + col * (cellWidth + photoGap);
+      const y = photosStartY + row * (photoHeight + photoGap);
+      c.save();
+      roundedRect(c, x, y, cellWidth, photoHeight, 8);
+      c.clip();
+      const layoutFilter = settings.sessionMode === 'filters'
+        ? ((settings.photoFilters || [])[index] || 'none')
+        : (settings.photoFilter || 'none');
+      c.filter = filterCss(layoutFilter);
+      drawPhotoToCanvas(image, c, x, y, cellWidth, photoHeight, false);
+      c.filter = 'none';
+      c.restore();
+      c.strokeStyle = isModern ? '#625c54' : '#e5d8ce';
+      c.lineWidth = 2;
+      c.strokeRect(x + 1, y + 1, cellWidth - 2, photoHeight - 2);
+    });
+
+    const photosBottom = photosStartY + rows * photoHeight + Math.max(0, rows - 1) * photoGap;
+    const footerTop = photosBottom + 31;
+    c.fillStyle = borderColor;
+    c.beginPath(); c.arc(width/2, footerTop + 9, 4, 0, Math.PI*2); c.fill();
+    c.fillStyle = textColor;
+    c.font = 'italic 25px Georgia, serif';
+    wrapCanvasText(c, settings.footerText || 'Thanks for being part of our story', width/2, footerTop + 55, width - 88, 31, 2);
+    c.fillStyle = subColor;
+    c.font = '700 12px Arial, sans-serif';
+    c.letterSpacing = '2px';
+    c.fillText('KEEP THIS MEMORY', width/2, height - 43);
+    return strip.toDataURL('image/png');
+  }
+
+  function updateSaveFolderStatus(message, state = '') {
+    const el = $('saveFolderStatus');
+    el.textContent = message;
+    el.classList.toggle('saved', state === 'saved');
+    el.classList.toggle('error', state === 'error');
+  }
+
+  function makeLocalTimestamp(date = new Date()) {
+    const pad = value => String(value).padStart(2, '0');
+    return `${date.getFullYear()}${pad(date.getMonth() + 1)}${pad(date.getDate())}-${pad(date.getHours())}${pad(date.getMinutes())}${pad(date.getSeconds())}${String(date.getMilliseconds()).padStart(3, '0')}`;
+  }
+
+  function todayLocalDate() {
+    const date = new Date();
+    const pad = value => String(value).padStart(2, '0');
+    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+  }
+
+  function dataUrlToBlob(dataUrl) {
+    const parts = dataUrl.split(',');
+    const mime = (parts[0].match(/data:([^;]+)/) || [])[1] || 'application/octet-stream';
+    const binary = atob(parts[1]);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+    return new Blob([bytes], { type: mime });
+  }
+
+  async function chooseSaveFolder() {
+    if (!('showDirectoryPicker' in window)) {
+      updateSaveFolderStatus('Direct folder saving is not available in this browser context. Try current Chrome or open the app from a secure HTTPS/local address.', 'error');
+      return;
+    }
+    try {
+      const handle = await window.showDirectoryPicker({ id: 'memory-booth-sd-folder', mode: 'readwrite' });
+      saveDirectoryHandle = handle;
+      eventDirectoryHandle = null;
+      await persistSaveFolderHandle(handle);
+      updateSaveFolderStatus(`Selected folder: ${handle.name}. Event photos will be saved here in a separate event subfolder.`, 'saved');
+      setWelcomeError('');
+    } catch (error) {
+      if (error && error.name === 'AbortError') return;
+      updateSaveFolderStatus(`Could not select that folder${error && error.message ? ': ' + error.message : '.'} Try selecting a folder directly on the SD card.`, 'error');
+    }
+  }
+
+  async function getEventDirectoryHandle() {
+    if (!saveDirectoryHandle) throw new Error('No SD card save folder is selected. Return to setup and choose one.');
+    if (!eventDirectoryHandle) {
+      const datePart = currentSettings.eventDate || todayLocalDate();
+      const eventFolderName = `${safeFilename(currentSettings.eventName)}-${datePart}`.slice(0, 90);
+      eventDirectoryHandle = await saveDirectoryHandle.getDirectoryHandle(eventFolderName || `event-${datePart}`, { create: true });
+    }
+    return eventDirectoryHandle;
+  }
+
+  async function writeBlobToCard(filename, blob) {
+    const directory = await getEventDirectoryHandle();
+    const fileHandle = await directory.getFileHandle(filename, { create: true });
+    const writable = await fileHandle.createWritable();
+    try {
+      await writable.write(blob);
+    } finally {
+      await writable.close();
+    }
+    return directory.name;
+  }
+
+  async function saveCapturedPhotoToCard(index, dataUrl) {
+    if (!saveDirectoryHandle) return { ok: false, error: 'No SD card folder is selected.' };
+    try {
+      const filename = `${currentSessionPrefix}-photo-${String(index + 1).padStart(2, '0')}.jpg`;
+      const folderName = await writeBlobToCard(filename, dataUrlToBlob(dataUrl));
+      savedPhotoIndexes.add(index);
+      updateSaveFolderStatus(`Saving to SD card: ${folderName}`, 'saved');
+      return { ok: true, folderName };
+    } catch (error) {
+      const message = error && error.message ? error.message : 'Unknown write error';
+      updateSaveFolderStatus(`SD card save failed: ${message}. Reconnect the card and retry from the review screen.`, 'error');
+      return { ok: false, error: message };
+    }
+  }
+
+  async function saveSessionFilesToCard(forceAllPhotos = false) {
+    if (!saveDirectoryHandle) throw new Error('No SD card folder is selected. Return to setup and choose one.');
+    const failures = [];
+    for (let i = 0; i < capturePhotos.length; i++) {
+      if (!forceAllPhotos && savedPhotoIndexes.has(i)) continue;
+      const result = await saveCapturedPhotoToCard(i, capturePhotos[i]);
+      if (!result.ok) {
+        savedPhotoIndexes.delete(i);
+        failures.push(`Photo ${i + 1}: ${result.error}`);
+      }
+    }
+    try {
+      const filename = `${currentSessionPrefix}-photo-strip.png`;
+      await writeBlobToCard(filename, dataUrlToBlob(finalStripDataUrl));
+      stripSavedToCard = true;
+      updateSaveFolderStatus(`Saved to SD card: ${saveDirectoryHandle.name}`, 'saved');
+    } catch (error) {
+      stripSavedToCard = false;
+      failures.push(`Photo strip: ${error && error.message ? error.message : 'Unknown write error'}`);
+    }
+    const allPhotosSaved = savedPhotoIndexes.size === capturePhotos.length;
+    const eventFolderName = `${safeFilename(currentSettings.eventName)}-${currentSettings.eventDate || todayLocalDate()}`;
+    const completionStatus = $('completionSaveStatus');
+    const ok = failures.length === 0 && allPhotosSaved && stripSavedToCard;
+    if (ok) {
+      completionStatus.textContent = `✓ Photos saved to the SD card in “${eventFolderName}”. Please ask the host how to receive your copies.`;
+      completionStatus.classList.remove('error');
+    } else {
+      const message = `⚠ Some files could not be saved. ${failures.join(' | ') || 'Please alert the host to check the SD card.'}`;
+      completionStatus.textContent = message;
+      completionStatus.classList.add('error');
+    }
+    $('reviewSaveStatus').textContent = completionStatus.textContent;
+    return { ok, message: completionStatus.textContent };
+  }
+
+  async function runCompletionTimer(token, durationSeconds) {
+    const durationMs = durationSeconds * 1000;
+    const endAt = Date.now() + durationMs;
+    $('completionTimerText').textContent = String(durationSeconds);
+    $('completionProgress').style.width = '0%';
+    while (token === sessionToken) {
+      const remaining = Math.max(0, endAt - Date.now());
+      const secondsLeft = Math.ceil(remaining / 1000);
+      $('completionTimerText').textContent = String(secondsLeft);
+      $('completionProgress').style.width = `${Math.min(100, ((durationMs - remaining) / durationMs) * 100)}%`;
+      if (remaining <= 0) break;
+      const completed = await wait(Math.min(180, remaining), token);
+      if (!completed) return;
+    }
+    if (token === sessionToken) {
+      setWelcomeError('');
+      showScreen('welcomeScreen');
+    }
+  }
+
+  async function beginNewSession(photoCount, mode = 'standard') {
+    if (busy || startingSession) return;
+    startingSession = true;
+    try {
+      sessionPhotoCount = photoCount === 1 ? 1 : 4;
+      currentSessionMode = mode;
+      saveSettings();
+      setWelcomeError('');
+      if (!saveDirectoryHandle) {
+        setWelcomeError('Ask the host to unlock Admin settings and select a folder on the SD card before starting the booth.');
+        return;
+      }
+      try {
+        if (saveDirectoryHandle.queryPermission) {
+          let permission = await saveDirectoryHandle.queryPermission({mode:'readwrite'});
+          if (permission !== 'granted' && saveDirectoryHandle.requestPermission) permission = await saveDirectoryHandle.requestPermission({mode:'readwrite'});
+          if (permission !== 'granted') throw new Error('The host must unlock Admin settings and reselect the SD card folder to grant save access.');
+        }
+      } catch (error) { setWelcomeError(error.message || 'SD card access needs to be granted again in Admin settings.'); return; }
+      currentSettings = getSettings();
+      currentSettings.sessionMode = currentSessionMode;
+      eventDirectoryHandle = null;
+      currentSessionPrefix = `${makeLocalTimestamp()}-${safeFilename(currentSettings.eventName)}`;
+      savedPhotoIndexes = new Set();
+      stripSavedToCard = false;
+      try {
+        await startCamera();
+        showScreen('captureScreen');
+        await runCaptureSession();
+      } catch (error) {
+        stopCamera();
+        showScreen('welcomeScreen');
+        setWelcomeError(readableCameraError(error));
+      }
+    } finally {
+      startingSession = false;
+    }
+  }
+
+  function cancelSession() {
+    sessionToken++;
+    busy = false;
+    $('countdownOverlay').classList.remove('show');
+    stopCamera();
+    resetShotSlots(sessionPhotoCount);
+    showScreen('welcomeScreen');
+  }
+
+  function safeFilename(value) {
+    const cleaned = String(value || 'photo-booth-strip').normalize('NFKD').replace(/[^a-zA-Z0-9]+/g, '-').replace(/^-+|-+$/g, '').toLowerCase();
+    return (cleaned || 'photo-booth-strip').slice(0, 60);
+  }
+
+  async function downloadStrip() {
+    if (!finalStripDataUrl || savingInProgress) return;
+    if (!saveDirectoryHandle) {
+      $('reviewSaveStatus').textContent = 'No SD card folder is selected. Return to event setup and choose a folder on your SD card.';
+      return;
+    }
+    savingInProgress = true;
+    const button = $('downloadButton');
+    button.disabled = true;
+    button.textContent = 'Saving to SD card…';
+    try {
+      await saveSessionFilesToCard(true);
+    } catch (error) {
+      $('reviewSaveStatus').textContent = `Could not save to the SD card: ${error && error.message ? error.message : 'Unknown error'}. Check that the card is connected, then retry.`;
+      updateSaveFolderStatus('SD card save failed. Check the card and try again.', 'error');
+    } finally {
+      savingInProgress = false;
+      button.disabled = false;
+      button.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12m-5-5 5 5 5-5"/><path d="M5 17v4h14v-4"/></svg> Save / retry SD card save';
+    }
+  }
+
+  function openAdminLogin() {
+    $('adminPinInput').value = '';
+    $('adminLoginError').classList.remove('show');
+    showScreen('adminLoginScreen');
+    $('adminPinInput').focus();
+  }
+
+  async function pinHash(pin) {
+    const bytes = new TextEncoder().encode(String(pin));
+    if (window.crypto && crypto.subtle) {
+      const digest = await crypto.subtle.digest('SHA-256', bytes);
+      return Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2,'0')).join('');
+    }
+    // Fallback only for unusual local contexts without Web Crypto. The app is intended to be hosted over HTTPS.
+    return `fallback:${String(pin)}`;
+  }
+
+  async function verifyAdminPin(pin) {
+    let savedHash = '';
+    try { savedHash = localStorage.getItem('memoryBoothAdminPinHash') || ''; } catch (_) {}
+    const candidate = await pinHash(pin);
+    return candidate === (savedHash || await pinHash(DEFAULT_ADMIN_PIN));
+  }
+
+  async function updateAdminPin(oldPin, newPin) {
+    if (!(await verifyAdminPin(oldPin))) throw new Error('The current PIN is incorrect.');
+    if (!/^\d{4,12}$/.test(newPin)) throw new Error('Choose a PIN containing 4 to 12 digits.');
+    try { localStorage.setItem('memoryBoothAdminPinHash', await pinHash(newPin)); }
+    catch (_) { throw new Error('The PIN could not be saved in this browser.'); }
+  }
+
+  async function restoreSaveFolderHandle() {
+    if (!('showDirectoryPicker' in window) || !('indexedDB' in window)) return;
+    try {
+      const db = await new Promise((resolve, reject) => {
+        const request = indexedDB.open('memoryBoothHandles', 1);
+        request.onupgradeneeded = () => request.result.createObjectStore('handles');
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+      });
+      const handle = await new Promise((resolve, reject) => {
+        const tx = db.transaction('handles', 'readonly');
+        const req = tx.objectStore('handles').get('sd-folder');
+        req.onsuccess = () => resolve(req.result || null);
+        req.onerror = () => reject(req.error);
+      });
+      db.close();
+      if (handle) {
+        saveDirectoryHandle = handle;
+        const permission = handle.queryPermission ? await handle.queryPermission({mode:'readwrite'}) : 'prompt';
+        if (permission === 'granted') updateSaveFolderStatus(`Saved location remembered: ${handle.name}.`, 'saved');
+        else updateSaveFolderStatus(`Remembered folder: ${handle.name}. Click “Choose SD card folder” to grant access again.`, '');
+      }
+    } catch (error) { console.warn('Could not restore SD card folder handle:', error); }
+  }
+
+  async function persistSaveFolderHandle(handle) {
+    if (!('indexedDB' in window)) return;
+    try {
+      const db = await new Promise((resolve, reject) => {
+        const request = indexedDB.open('memoryBoothHandles', 1);
+        request.onupgradeneeded = () => request.result.createObjectStore('handles');
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+      });
+      await new Promise((resolve, reject) => {
+        const tx = db.transaction('handles', 'readwrite');
+        tx.objectStore('handles').put(handle, 'sd-folder');
+        tx.oncomplete = resolve;
+        tx.onerror = () => reject(tx.error);
+      });
+      db.close();
+    } catch (error) { console.warn('Could not remember SD card folder:', error); }
+  }
+
+  function readProfiles() {
+    try { const value = JSON.parse(localStorage.getItem('memoryBoothProfiles') || '{}'); return value && typeof value === 'object' ? value : {}; }
+    catch (_) { return {}; }
+  }
+  function refreshProfileSelect(selectName = '') {
+    const select = $('profileSelect'); const profiles = readProfiles();
+    select.innerHTML = '<option value="">Choose saved profile…</option>' + Object.keys(profiles).sort((a,b)=>a.localeCompare(b)).map(name => `<option value="${escapeText(name)}">${escapeText(name)}</option>`).join('');
+    if (selectName && profiles[selectName]) select.value = selectName;
+  }
+  function setProfileStatus(message, error = false) {
+    $('profileStatus').textContent = message; $('profileStatus').style.color = error ? '#a32929' : '';
+  }
+  function applyProfileSettings(saved) {
+    const map = {businessName:'businessName',eventName:'eventName',eventDate:'eventDate',accentColor:'accentColor',stripStyle:'stripStyle',stripLayout:'stripLayout',countdownSeconds:'countdownSeconds',intervalSeconds:'intervalSeconds',photoFilter:'photoFilter',poseChallenges:'poseChallenges',footerText:'footerText',finishScreenDuration:'finishScreenDuration',finishTitle:'finishTitle',finishMessage:'finishMessage',finishWebsiteLabel:'finishWebsiteLabel',finishWebsiteUrl:'finishWebsiteUrl',finishBackgroundColor:'finishBackgroundColor',finishTextColor:'finishTextColor'};
+    Object.entries(map).forEach(([key,id]) => { if (saved[key] !== undefined && $(id)) $(id).value = String(saved[key]); });
+    if (Array.isArray(saved.photoFilters)) saved.photoFilters.slice(0,4).forEach((filter,index) => {
+      if (['none','vivid','bw','warm','cool','soft'].includes(filter)) $(`filterShot${index + 1}`).value = filter;
+    });
+    brandLogoDataUrl = typeof saved.brandLogoDataUrl === 'string' && saved.brandLogoDataUrl.startsWith('data:image/') ? saved.brandLogoDataUrl : '';
+    $('logoStatus').textContent = brandLogoDataUrl ? 'Profile logo loaded on this device.' : 'Upload a small PNG or JPG to print it on the photo layout. The logo stays on this device.';
+    saveSettings();
+  }
+  function saveCurrentAsProfile() {
+    const name = window.prompt('Name this event profile (for example: Smith Wedding):');
+    if (!name || !name.trim()) return;
+    const cleanName = name.trim().slice(0,60); const profiles = readProfiles();
+    profiles[cleanName] = getSettings();
+    try { localStorage.setItem('memoryBoothProfiles', JSON.stringify(profiles)); refreshProfileSelect(cleanName); setProfileStatus(`Saved profile “${cleanName}”.`); }
+    catch (_) { setProfileStatus('Could not save this profile. Browser storage may be full.', true); }
+  }
+  function loadSelectedProfile() {
+    const name = $('profileSelect').value; const profile = readProfiles()[name];
+    if (!name || !profile) { setProfileStatus('Choose a saved profile first.', true); return; }
+    applyProfileSettings(profile); setProfileStatus(`Loaded “${name}”. Check the SD-card folder before starting the event.`);
+  }
+  function deleteSelectedProfile() {
+    const name = $('profileSelect').value; const profiles = readProfiles();
+    if (!name || !profiles[name]) { setProfileStatus('Choose a saved profile first.', true); return; }
+    if (!window.confirm(`Delete the saved profile “${name}”? This does not delete any photos.`)) return;
+    delete profiles[name]; localStorage.setItem('memoryBoothProfiles', JSON.stringify(profiles)); refreshProfileSelect(); setProfileStatus(`Deleted “${name}”.`);
+  }
+  function formatBytes(bytes) {
+    if (!Number.isFinite(bytes) || bytes < 0) return '—';
+    if (bytes < 1024) return `${bytes} B`;
+    const units=['KB','MB','GB','TB']; let value=bytes/1024, index=0;
+    while(value>=1024 && index<units.length-1){value/=1024;index++;}
+    return `${value.toFixed(value>=100?0:1)} ${units[index]}`;
+  }
+  async function refreshStorageMonitor() {
+    $('storageMonitorStatus').textContent = 'Scanning folder and checking browser storage…';
+    $('refreshStorageButton').disabled = true;
+    try {
+      let count = 0, bytes = 0, capped = false;
+      async function scan(dir, depth=0) {
+        if (depth > 4 || count >= 2500) { capped = true; return; }
+        for await (const entry of dir.values()) {
+          if (count >= 2500) { capped = true; return; }
+          if (entry.kind === 'file') { const file = await entry.getFile(); count++; bytes += file.size; }
+          else if (entry.kind === 'directory') await scan(entry, depth+1);
+        }
+      }
+      if (saveDirectoryHandle) await scan(saveDirectoryHandle);
+      $('sdFileCount').textContent = saveDirectoryHandle ? (capped ? `${count}+` : String(count)) : 'Not selected';
+      $('sdDataSize').textContent = saveDirectoryHandle ? formatBytes(bytes) : '—';
+      if (navigator.storage && navigator.storage.estimate) {
+        const estimate = await navigator.storage.estimate();
+        $('browserStorageUsage').textContent = formatBytes(estimate.usage || 0);
+        $('browserStorageQuota').textContent = formatBytes(estimate.quota || 0);
+        const pct = estimate.quota ? Math.min(100, (estimate.usage || 0) / estimate.quota * 100) : 0;
+        $('browserStorageBar').style.width = `${pct}%`;
+      } else {
+        $('browserStorageUsage').textContent = 'Unavailable'; $('browserStorageQuota').textContent = 'Unavailable'; $('browserStorageBar').style.width = '0%';
+      }
+      $('storageMonitorStatus').textContent = !saveDirectoryHandle ? 'No SD-card folder is selected. Select it below, then refresh.' : `Folder scan complete${capped ? ' (scan capped at 2,500 files / 4 subfolder levels)' : ''}. This is a file-size scan, not remaining free capacity.`;
+    } catch (error) { $('storageMonitorStatus').textContent = `Could not scan folder: ${error.message || 'permission may need to be granted again'}. Reselect the SD-card folder and retry.`; }
+    finally { $('refreshStorageButton').disabled = false; }
+  }
+
+  function saveAdminSettings(event) {
+    if (event) event.preventDefault();
+    if (!adminUnlocked) { openAdminLogin(); return; }
+    saveSettings();
+    setWelcomeError('');
+    showScreen('welcomeScreen');
+  }
+
+  $('adminButton').addEventListener('click', openAdminLogin);
+  $('cancelAdminLoginButton').addEventListener('click', () => showScreen('welcomeScreen'));
+  $('adminLoginForm').addEventListener('submit', async event => {
+    event.preventDefault();
+    const pin = $('adminPinInput').value;
+    if (await verifyAdminPin(pin)) {
+      adminUnlocked = true;
+      $('adminLoginError').classList.remove('show');
+      $('adminPinInput').value = '';
+      showScreen('adminScreen');
+      refreshProfileSelect();
+      refreshStorageMonitor();
+    } else {
+      $('adminLoginError').textContent = 'Incorrect PIN. Try again.';
+      $('adminLoginError').classList.add('show');
+      $('adminPinInput').select();
+    }
+  });
+  form.addEventListener('submit', saveAdminSettings);
+  $('exitAdminButton').addEventListener('click', () => { adminUnlocked = false; saveSettings(); showScreen('welcomeScreen'); });
+  $('singlePhotoButton').addEventListener('click', () => beginNewSession(1, 'standard'));
+  $('posePhotoButton').addEventListener('click', () => beginNewSession(4, 'pose'));
+  $('filterPhotoButton').addEventListener('click', () => beginNewSession(4, 'filters'));
+  $('fourPhotoButton').addEventListener('click', () => beginNewSession(4, 'standard'));
+  document.addEventListener('keydown', event => {
+    if (event.defaultPrevented || event.repeat || event.ctrlKey || event.altKey || event.metaKey || event.shiftKey) return;
+    if (!$('welcomeScreen').classList.contains('active') || busy || startingSession) return;
+    const target = event.target;
+    if (target && target.closest && target.closest('input, textarea, select, [contenteditable="true"]')) return;
+    let photoChoice = 0;
+    let mode = 'standard';
+    if (event.key === '1' || event.code === 'Numpad1') photoChoice = 1;
+    if (event.key === '2' || event.code === 'Numpad2') { photoChoice = 4; mode = 'pose'; }
+    if (event.key === '3' || event.code === 'Numpad3') { photoChoice = 4; mode = 'filters'; }
+    if (event.key === '4' || event.code === 'Numpad4') photoChoice = 4;
+    if (!photoChoice) return;
+    event.preventDefault();
+    beginNewSession(photoChoice, mode);
+  });
+  $('changePinButton').addEventListener('click', async () => {
+    const status = $('pinStatus');
+    try {
+      const currentPin = $('currentAdminPin').value;
+      const newPin = $('newAdminPin').value;
+      const confirmPin = $('confirmAdminPin').value;
+      if (newPin !== confirmPin) throw new Error('The new PINs do not match.');
+      await updateAdminPin(currentPin, newPin);
+      $('currentAdminPin').value = $('newAdminPin').value = $('confirmAdminPin').value = '';
+      status.textContent = 'Admin PIN updated successfully.';
+      status.className = 'save-location-status saved';
+    } catch (error) {
+      status.textContent = error.message || 'Could not update the admin PIN.';
+      status.className = 'save-location-status error';
+    }
+  });
+  $('brandLogo').addEventListener('change', async event => {
+    const file = event.target.files && event.target.files[0];
+    if (!file) return;
+    if (file.size > 2 * 1024 * 1024) {
+      $('logoStatus').textContent = 'Please use a logo smaller than 2 MB.';
+      event.target.value = '';
+      return;
+    }
+    if (!file.type.startsWith('image/')) { $('logoStatus').textContent = 'Choose a PNG, JPG or other supported image.'; return; }
+    const reader = new FileReader();
+    reader.onload = () => {
+      brandLogoDataUrl = String(reader.result || '');
+      saveSettings();
+      $('logoStatus').textContent = 'Logo saved on this device and will appear on the photo layout.';
+    };
+    reader.onerror = () => $('logoStatus').textContent = 'The logo could not be read. Try another image.';
+    reader.readAsDataURL(file);
+  });
+  ['businessName','eventName','eventDate','accentColor','stripStyle','stripLayout','countdownSeconds','intervalSeconds','photoFilter','poseChallenges','filterShot1','filterShot2','filterShot3','filterShot4','footerText','finishScreenDuration','finishTitle','finishMessage','finishWebsiteLabel','finishWebsiteUrl','finishBackgroundColor','finishTextColor'].forEach(id => {
+    $(id).addEventListener('input', () => saveSettings());
+    $(id).addEventListener('change', () => saveSettings());
+  });
+  $('chooseSaveFolderButton').addEventListener('click', async () => { await chooseSaveFolder(); refreshStorageMonitor(); });
+  $('saveProfileButton').addEventListener('click', saveCurrentAsProfile);
+  $('loadProfileButton').addEventListener('click', loadSelectedProfile);
+  $('deleteProfileButton').addEventListener('click', deleteSelectedProfile);
+  $('refreshStorageButton').addEventListener('click', refreshStorageMonitor);
+  $('keepPhotosButton').addEventListener('click', () => { finalizeCapturedSession(); });
+  $('retakePhotosButton').addEventListener('click', async () => {
+    if (startingSession) return;
+    sessionToken++; busy = false; startingSession = true;
+    try {
+      if (!saveDirectoryHandle) { setWelcomeError('Select an SD-card folder in Host settings before taking photos.'); showScreen('welcomeScreen'); return; }
+      await startCamera(); showScreen('captureScreen'); await runCaptureSession();
+    } catch (error) { stopCamera(); showScreen('welcomeScreen'); setWelcomeError(readableCameraError(error)); }
+    finally { startingSession = false; }
+  });
+  $('cancelReviewButton').addEventListener('click', () => { sessionToken++; busy = false; stopCamera(); resetShotSlots(sessionPhotoCount); showScreen('welcomeScreen'); });
+  $('reviewChooseFolderButton').addEventListener('click', openAdminLogin);
+  $('reviewChooseFolderButton').addEventListener('click', openAdminLogin);
+  $('cancelSessionButton').addEventListener('click', cancelSession);
+  $('downloadButton').addEventListener('click', downloadStrip);
+  $('newSessionButton').addEventListener('click', () => {
+    sessionToken++;
+    busy = false;
+    showScreen('welcomeScreen');
+  });
+  $('backToWelcomeButton').addEventListener('click', () => {
+    sessionToken++;
+    busy = false;
+    stopCamera();
+    setWelcomeError('');
+    openAdminLogin();
+  });
+  window.addEventListener('pagehide', stopCamera);
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden && cameraStream) {
+      // Cancel rather than accidentally capture frozen frames while the tab is hidden.
+      sessionToken++;
+      busy = false;
+      $('countdownOverlay').classList.remove('show');
+      stopCamera();
+      if ($('captureScreen').classList.contains('active')) {
+        resetShotSlots();
+        showScreen('welcomeScreen');
+      }
+    }
+  });
+  loadSettings();
+  restoreSaveFolderHandle();
+  if (!('showDirectoryPicker' in window)) {
+    updateSaveFolderStatus('This browser context does not support direct folder access. Use an up-to-date Chrome browser and, if needed, open the app from HTTPS or localhost.', 'error');
+  }
+})();
+</script>
+
+<script>
+  // Installable app support: when Chrome offers installation, show an in-app button.
+  let deferredInstallPrompt = null;
+  const installAppButton = document.getElementById('installAppButton');
+  window.addEventListener('beforeinstallprompt', event => {
+    event.preventDefault();
+    deferredInstallPrompt = event;
+    if (installAppButton) installAppButton.classList.remove('hidden');
+  });
+  if (installAppButton) {
+    installAppButton.addEventListener('click', async () => {
+      if (!deferredInstallPrompt) return;
+      deferredInstallPrompt.prompt();
+      try {
+        const result = await deferredInstallPrompt.userChoice;
+        if (result && result.outcome === 'accepted') installAppButton.classList.add('hidden');
+      } finally {
+        deferredInstallPrompt = null;
+      }
+    });
+  }
+  window.addEventListener('appinstalled', () => {
+    if (installAppButton) installAppButton.classList.add('hidden');
+  });
+  // Service workers require HTTPS or localhost; errors are harmless when opening a local file.
+  if ('serviceWorker' in navigator && location.protocol !== 'file:') {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js').catch(error => console.warn('Offline support could not be enabled:', error));
+    });
+  }
+</script>
+
+</body>
+</html>
