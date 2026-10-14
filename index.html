@@ -20,8 +20,19 @@
     --card: #fffefa;
     --soft: #f2ebe2;
     --good: #2d7858;
+    --welcome-bg: #fbf8f3;
+    --welcome-text: #272622;
+    --welcome-button: #b96f58;
     --shadow: 0 18px 50px rgba(51, 39, 29, .08);
   }
+  html.welcome-theme { background: var(--welcome-bg); }
+  body.welcome-theme { background: var(--welcome-bg); color: var(--welcome-text); }
+  #welcomeScreen .intro h1, #welcomeScreen .intro p, #welcomeScreen .feature b, #welcomeScreen .feature small { color: var(--welcome-text); }
+  #welcomeScreen .intro p { opacity: .82; }
+  #welcomeScreen .eyebrow { color: var(--welcome-button); }
+  #welcomeScreen .feature-icon, #welcomeScreen .mode-icon { color: var(--welcome-button); }
+  #welcomeScreen .guest-mode-card { border-color: color-mix(in srgb, var(--welcome-button) 55%, white); background: color-mix(in srgb, var(--welcome-button) 8%, white); }
+  #welcomeScreen .guest-mode-card:hover { border-color: var(--welcome-button); background: color-mix(in srgb, var(--welcome-button) 16%, white); }
   * { box-sizing: border-box; }
   html { min-height: 100%; background: var(--paper); }
   body {
@@ -48,6 +59,7 @@
   @keyframes enter { from { opacity:0; transform:translateY(7px); } to {opacity:1; transform:translateY(0);} }
   .eyebrow { font-size:11px; letter-spacing:.18em; font-weight:800; text-transform:uppercase; color:var(--accent-dark); }
   h1 { font-family: Georgia, "Times New Roman", serif; letter-spacing:-.045em; line-height:1.02; font-size:clamp(36px,5vw,64px); font-weight:500; margin:11px 0 14px; }
+  #welcomeTitle { white-space: pre-line; }
   h2 { font-family:Georgia, "Times New Roman", serif; letter-spacing:-.025em; font-size:27px; font-weight:500; margin:0; }
   h3 { font-size:14px; margin:0; }
   p { color:var(--muted); line-height:1.65; }
@@ -234,8 +246,9 @@
       <div class="welcome-grid">
         <div class="intro">
           <div class="eyebrow">Your event, your style</div>
-          <h1 id="welcomeTitle">Make a memory<br>worth keeping.</h1>
-          <p>A simple, customisable photo booth for weddings, birthdays and celebrations. Get everyone together, strike a pose, and take home a little piece of the day.</p>
+          <h1 id="welcomeTitle">Make a memory
+worth keeping.</h1>
+          <p id="welcomeDescription">A simple, customisable photo booth for weddings, birthdays and celebrations. Get everyone together, strike a pose, and take home a little piece of the day.</p>
           <div class="feature-row">
             <div class="feature">
               <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.3 2"/></svg>
@@ -325,6 +338,24 @@
               <div class="field">
                 <label for="accentColor">ACCENT COLOUR</label>
                 <input type="color" id="accentColor" value="#b96f58" aria-label="Choose the photo strip accent colour">
+              </div>
+              <div class="field full section-break">
+                <strong>Guest home screen customisation</strong>
+                <small>Change the welcome wording and colours shown to guests. These settings are included when you save an event profile.</small>
+              </div>
+              <div class="field full">
+                <label for="welcomeHeading">WELCOME HEADING</label>
+                <textarea id="welcomeHeading" rows="2" maxlength="100" placeholder="Strike a pose.&#10;Keep the memory.">Make a memory
+worth keeping.</textarea>
+              </div>
+              <div class="field full">
+                <label for="welcomeDescription">WELCOME DESCRIPTION</label>
+                <textarea id="welcomeDescription" rows="3" maxlength="300" placeholder="Add a short welcome message for your guests.">A simple, customisable photo booth for weddings, birthdays and celebrations. Get everyone together, strike a pose, and take home a little piece of the day.</textarea>
+              </div>
+              <div class="field-grid" style="grid-column:1/-1">
+                <div class="field"><label for="welcomeBackgroundColor">HOME BACKGROUND COLOUR</label><input type="color" id="welcomeBackgroundColor" value="#fbf8f3"></div>
+                <div class="field"><label for="welcomeTextColor">HOME TEXT COLOUR</label><input type="color" id="welcomeTextColor" value="#272622"></div>
+                <div class="field full"><label for="welcomeButtonColor">GUEST BUTTON ACCENT COLOUR</label><input type="color" id="welcomeButtonColor" value="#b96f58"><div class="helper">Changes the borders, icons and hover colour of the four guest photo choices.</div></div>
               </div>
               <div class="field full">
                 <label for="stripStyle">PHOTO STRIP STYLE</label>
@@ -602,6 +633,8 @@
 
   function showScreen(id) {
     screens.forEach(screenId => $(screenId).classList.toggle('active', screenId === id));
+    document.body.classList.toggle('welcome-theme', id === 'welcomeScreen');
+    document.documentElement.classList.toggle('welcome-theme', id === 'welcomeScreen');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
@@ -615,6 +648,11 @@
       eventName: $('eventName').value.trim() || 'A Day to Remember',
       eventDate: $('eventDate').value,
       accentColor: $('accentColor').value || '#b96f58',
+      welcomeHeading: $('welcomeHeading').value || 'Make a memory\nworth keeping.',
+      welcomeDescription: $('welcomeDescription').value.trim() || 'Choose a photo experience and make a memory.',
+      welcomeBackgroundColor: $('welcomeBackgroundColor').value || '#fbf8f3',
+      welcomeTextColor: $('welcomeTextColor').value || '#272622',
+      welcomeButtonColor: $('welcomeButtonColor').value || '#b96f58',
       stripStyle: $('stripStyle').value || 'classic',
       stripLayout: $('stripLayout').value || 'vertical',
       countdownSeconds: Number($('countdownSeconds').value || 3),
@@ -638,6 +676,14 @@
   function applyBranding(settings) {
     document.documentElement.style.setProperty('--accent', settings.accentColor);
     document.documentElement.style.setProperty('--accent-dark', shadeColor(settings.accentColor, -25));
+    document.documentElement.style.setProperty('--welcome-bg', settings.welcomeBackgroundColor || '#fbf8f3');
+    document.documentElement.style.setProperty('--welcome-text', settings.welcomeTextColor || '#272622');
+    document.documentElement.style.setProperty('--welcome-button', settings.welcomeButtonColor || settings.accentColor || '#b96f58');
+    const welcomeIsActive = $('welcomeScreen').classList.contains('active');
+    document.body.classList.toggle('welcome-theme', welcomeIsActive);
+    document.documentElement.classList.toggle('welcome-theme', welcomeIsActive);
+    $('welcomeTitle').textContent = settings.welcomeHeading || 'Make a memory\nworth keeping.';
+    $('welcomeDescription').textContent = settings.welcomeDescription || 'Choose a photo experience and make a memory.';
     $('topBrand').textContent = settings.businessName;
     $('footerBrand').textContent = settings.businessName.toUpperCase();
     $('eventCameraLabel').textContent = settings.eventName.toUpperCase();
@@ -694,6 +740,11 @@
         if (saved.eventName) $('eventName').value = saved.eventName;
         if (saved.eventDate) $('eventDate').value = saved.eventDate;
         if (saved.accentColor && /^#[0-9a-f]{6}$/i.test(saved.accentColor)) $('accentColor').value = saved.accentColor;
+        if (typeof saved.welcomeHeading === 'string') $('welcomeHeading').value = saved.welcomeHeading;
+        if (typeof saved.welcomeDescription === 'string') $('welcomeDescription').value = saved.welcomeDescription;
+        if (typeof saved.welcomeBackgroundColor === 'string' && /^#[0-9a-f]{6}$/i.test(saved.welcomeBackgroundColor)) $('welcomeBackgroundColor').value = saved.welcomeBackgroundColor;
+        if (typeof saved.welcomeTextColor === 'string' && /^#[0-9a-f]{6}$/i.test(saved.welcomeTextColor)) $('welcomeTextColor').value = saved.welcomeTextColor;
+        if (typeof saved.welcomeButtonColor === 'string' && /^#[0-9a-f]{6}$/i.test(saved.welcomeButtonColor)) $('welcomeButtonColor').value = saved.welcomeButtonColor;
         if (['classic','modern','party'].includes(saved.stripStyle)) $('stripStyle').value = saved.stripStyle;
         if (['vertical','grid'].includes(saved.stripLayout)) $('stripLayout').value = saved.stripLayout;
         if ([1,2,3,5].includes(Number(saved.countdownSeconds))) $('countdownSeconds').value = String(saved.countdownSeconds);
@@ -1379,7 +1430,7 @@
     $('profileStatus').textContent = message; $('profileStatus').style.color = error ? '#a32929' : '';
   }
   function applyProfileSettings(saved) {
-    const map = {businessName:'businessName',eventName:'eventName',eventDate:'eventDate',accentColor:'accentColor',stripStyle:'stripStyle',stripLayout:'stripLayout',countdownSeconds:'countdownSeconds',intervalSeconds:'intervalSeconds',photoFilter:'photoFilter',poseChallenges:'poseChallenges',footerText:'footerText',finishScreenDuration:'finishScreenDuration',finishTitle:'finishTitle',finishMessage:'finishMessage',finishWebsiteLabel:'finishWebsiteLabel',finishWebsiteUrl:'finishWebsiteUrl',finishBackgroundColor:'finishBackgroundColor',finishTextColor:'finishTextColor'};
+    const map = {businessName:'businessName',eventName:'eventName',eventDate:'eventDate',accentColor:'accentColor',welcomeHeading:'welcomeHeading',welcomeDescription:'welcomeDescription',welcomeBackgroundColor:'welcomeBackgroundColor',welcomeTextColor:'welcomeTextColor',welcomeButtonColor:'welcomeButtonColor',stripStyle:'stripStyle',stripLayout:'stripLayout',countdownSeconds:'countdownSeconds',intervalSeconds:'intervalSeconds',photoFilter:'photoFilter',poseChallenges:'poseChallenges',footerText:'footerText',finishScreenDuration:'finishScreenDuration',finishTitle:'finishTitle',finishMessage:'finishMessage',finishWebsiteLabel:'finishWebsiteLabel',finishWebsiteUrl:'finishWebsiteUrl',finishBackgroundColor:'finishBackgroundColor',finishTextColor:'finishTextColor'};
     Object.entries(map).forEach(([key,id]) => { if (saved[key] !== undefined && $(id)) $(id).value = String(saved[key]); });
     if (Array.isArray(saved.photoFilters)) saved.photoFilters.slice(0,4).forEach((filter,index) => {
       if (['none','vivid','bw','warm','cool','soft'].includes(filter)) $(`filterShot${index + 1}`).value = filter;

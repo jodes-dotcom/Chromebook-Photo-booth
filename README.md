@@ -1,31 +1,25 @@
-# Memory Booth v5 — Pose Challenge + Filter Mix
+# Memory Booth v6 — Custom Guest Home Screen
 
-## Keyboard choices
-- **1**: Single photo (existing mode)
-- **2**: Pose Challenge — takes four photos and shows a random fun pose prompt before every photo
-- **3**: Filter Mix — takes four photos and applies the four filters selected by the host, one per photo, to the finished PNG layout
-- **4**: Standard four-photo session (existing mode)
+This update adds editable guest welcome wording and home-screen colours to the v5 app.
 
-The number-row keys and numeric keypad keys are supported. Guests can also click the four on-screen choices.
+## New admin options
+- Welcome heading (supports a line break)
+- Welcome description
+- Home background colour
+- Home text colour
+- Guest button accent colour (choice-card borders, icons and hover state)
 
-## Configure the four filters
-1. Open Memory Booth and choose **Host settings**.
-2. Sign in with your existing administrator PIN.
-3. In **Filter Mix — filter for each of the four photos**, choose a filter for Photo 1, Photo 2, Photo 3 and Photo 4.
-4. Save event settings. These filter choices are included in saved event profiles.
+These settings save on the device and are included in saved event profiles, so you can create a different look for each booking. Existing keyboard choices remain: 1 single photo, 2 pose challenge, 3 filter mix, 4 standard four-photo session.
 
-Available filters: Original, Vivid, Black & White, Warm Vintage, Cool Tone and Soft Matte.
-
-## Update an existing GitHub Pages installation
-1. Download and extract this ZIP.
-2. Open your existing GitHub repository used by Memory Booth.
-3. Upload the **contents** of the `memory-booth-pwa` folder to the repository's publishing root, replacing the old files. Keep `index.html`, `manifest.webmanifest`, `sw.js` and `icons/` at the root.
-4. Commit the changes and wait for GitHub Pages to publish.
-5. On the HP, open the app URL while online and reload it. If the old version remains, close the app window, reopen the URL in Chrome and reload.
-6. Open Host settings and verify your saved event profile. If the app asks again, reselect the SD-card folder.
+## Update on GitHub Pages
+1. Extract this ZIP.
+2. Open the `memory-booth-pwa` folder.
+3. Upload/replace its contents in the root of your existing GitHub Pages repository. Keep `index.html`, `manifest.webmanifest`, `sw.js`, and `icons/` at the repository root.
+4. Commit the changes and wait for GitHub Pages to deploy.
+5. Open Memory Booth while online and reload it. The service-worker cache version has been updated to v6.
+6. Open Host settings (default PIN `2468` if you have not changed it), edit the Guest home screen customisation fields, and save.
 
 ## Notes
-- Original JPG captures remain unfiltered. The four selected filters are applied to the individual photo cells in the finished PNG layout. This preserves unedited originals on the SD card.
-- Pose Challenge (key 2) always shows a random prompt. The existing admin toggle controls whether prompts also appear in regular single/four-photo sessions.
-- The app is a browser-based PWA and must be tested on the actual ChromeOS Flex computer before paid events. Check camera access, folder permission and SD-card writes.
-- Keep the existing admin PIN; change it if it is still the default `2468`.
+- Colour controls affect the guest welcome screen. Accent colour remains a separate setting for the app and photo layout.
+- Existing settings are retained where available; new fields use the default Memory Booth palette until you customise them.
+- Test camera capture and SD-card saving after any app update before using it at a paid event.

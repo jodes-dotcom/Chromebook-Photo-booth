@@ -1,4 +1,4 @@
-const CACHE_NAME = 'memory-booth-pwa-v5-keyboard-modes-filter-mix';
+const CACHE_NAME = 'memory-booth-pwa-v6-custom-guest-home';
 const APP_ASSETS = [
   './',
   './index.html',
