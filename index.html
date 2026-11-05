@@ -150,6 +150,52 @@
   .guest-mode-card:hover { transform:translateY(-2px); border-color:var(--accent); background:color-mix(in srgb, var(--accent) 5%, white); }
   .guest-mode-card strong { font-size:17px; }
   .guest-mode-card span:last-child { color:var(--muted); font-size:12px; }
+  /* Full-height capture workspace: hide nonessential chrome and fit the camera/status panels to the viewport. */
+  body.capture-mode { min-height:100dvh; height:100dvh; overflow:hidden; }
+  body.capture-mode .app-shell { width:min(100% - 24px, 1440px); height:100dvh; min-height:0; padding:12px 0; display:flex; flex-direction:column; overflow:hidden; }
+  body.capture-mode .topbar, body.capture-mode .footer { display:none; }
+  body.capture-mode main { flex:1; min-height:0; display:flex; }
+  body.capture-mode #captureScreen.active { flex:1; min-height:0; display:flex; flex-direction:column; overflow:hidden; }
+  body.capture-mode .capture-header { flex:0 0 auto; align-items:center; margin:0 0 10px; gap:12px; }
+  body.capture-mode .capture-header h1 { font-size:clamp(25px,3vw,38px); margin:5px 0 3px; }
+  body.capture-mode .capture-header p { font-size:12px; }
+  body.capture-mode .capture-grid { flex:1; min-height:0; height:auto; grid-template-columns:minmax(0,1.65fr) minmax(245px,.75fr); gap:14px; }
+  body.capture-mode .camera-card { min-height:0; height:100%; }
+  body.capture-mode .camera-card video { width:100%; height:100%; min-height:0; max-height:none; object-fit:contain; }
+  body.capture-mode .side-panel { min-height:0; gap:10px; }
+  body.capture-mode .status-card, body.capture-mode .shots-card { padding:12px; border-radius:14px; }
+  body.capture-mode .status-title { margin-bottom:7px; }
+  body.capture-mode .status-message { font-size:11px; line-height:1.4; }
+  body.capture-mode .status-card .btn-row { margin-top:9px; }
+  body.capture-mode .shots-card .status-title { margin-bottom:6px; }
+  body.capture-mode .shots-card > p { display:none; }
+  body.capture-mode .shots-grid { gap:6px; margin-top:8px; }
+  body.capture-mode .shot-slot { aspect-ratio:1.6; min-height:38px; }
+  body.capture-mode .btn { padding:9px 12px; }
+  @media (max-height:680px) {
+    body.capture-mode .app-shell { padding:7px 0; }
+    body.capture-mode .capture-header { margin-bottom:6px; }
+    body.capture-mode .capture-header h1 { font-size:25px; }
+    body.capture-mode .capture-header p { display:none; }
+    body.capture-mode .status-card, body.capture-mode .shots-card { padding:8px; }
+    body.capture-mode .shots-grid { margin-top:5px; gap:4px; }
+    body.capture-mode .shot-slot { min-height:30px; }
+  }
+  @media (max-width:850px) {
+    body.capture-mode { overflow:auto; height:auto; min-height:100dvh; }
+    body.capture-mode .app-shell { height:auto; min-height:100dvh; overflow:visible; }
+    body.capture-mode main { display:block; }
+    body.capture-mode #captureScreen.active { display:block; overflow:visible; }
+    body.capture-mode .capture-grid { display:grid; height:auto; grid-template-columns:1fr; }
+    body.capture-mode .camera-card { height:min(56dvh,520px); min-height:230px; }
+    body.capture-mode .camera-card video { height:100%; min-height:0; }
+    body.capture-mode .side-panel { display:grid; grid-template-columns:1fr 1fr; }
+  }
+  @media (max-width:540px) {
+    body.capture-mode .side-panel { grid-template-columns:1fr; }
+    body.capture-mode .capture-header { align-items:flex-start; }
+    body.capture-mode .camera-card { height:48dvh; min-height:210px; }
+  }
   .mode-icon { display:grid; place-items:center; width:54px; height:54px; border-radius:17px; background:color-mix(in srgb, var(--accent) 13%, white); color:var(--accent-dark); font-size:33px; }
   .guest-hint { font-size:11px; margin:18px 0 0; }
   .mode-key { display:inline-flex; align-items:center; gap:5px; margin-top:4px; color:var(--muted); font-size:11px; }
@@ -245,22 +291,22 @@
     <section class="screen active" id="welcomeScreen" aria-labelledby="welcomeTitle">
       <div class="welcome-grid">
         <div class="intro">
-          <div class="eyebrow">Your event, your style</div>
+          <div class="eyebrow" id="welcomeEyebrowText">Your event, your style</div>
           <h1 id="welcomeTitle">Make a memory
 worth keeping.</h1>
           <p id="welcomeDescription">A simple, customisable photo booth for weddings, birthdays and celebrations. Get everyone together, strike a pose, and take home a little piece of the day.</p>
           <div class="feature-row">
             <div class="feature">
               <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.3 2"/></svg>
-              <b>Choose your session</b><small>One photo or four timed shots.</small>
+              <b id="welcomeFeature1TitleText">Choose your session</b><small id="welcomeFeature1DescriptionText">One photo or four timed shots.</small>
             </div>
             <div class="feature">
               <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M7 7h10M7 11h10M7 15h6"/></svg>
-              <b>Custom layout</b><small>Designed for this event.</small>
+              <b id="welcomeFeature2TitleText">Custom layout</b><small id="welcomeFeature2DescriptionText">Designed for this event.</small>
             </div>
             <div class="feature">
               <svg class="feature-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 3v12m-4-4 4 4 4-4"/><path d="M5 16v4h14v-4"/></svg>
-              <b>Easy download</b><small>Save a print-ready PNG from the browser.</small>
+              <b id="welcomeFeature3TitleText">Easy download</b><small id="welcomeFeature3DescriptionText">Save a print-ready PNG from the browser.</small>
             </div>
           </div>
         </div>
@@ -268,23 +314,23 @@ worth keeping.</h1>
         <div class="panel guest-choice-panel">
           <div class="panel-head">
             <div><h2 id="guestEventTitle">Welcome to our event</h2><p id="guestEventSubtitle">Choose your photo experience to begin.</p></div>
-            <span class="tiny-tag">Your turn</span>
+            <span class="tiny-tag" id="guestPanelBadge">Your turn</span>
           </div>
           <div class="guest-mode-grid">
             <button type="button" class="guest-mode-card" id="singlePhotoButton">
-              <span class="mode-icon">◉</span><strong>Single photo</strong><span>One photo to keep</span><span class="mode-key">Press <kbd>1</kbd></span>
+              <span class="mode-icon">◉</span><strong id="mode1TitleText">Single photo</strong><span id="mode1DescriptionText">One photo to keep</span><span class="mode-key">Press <kbd>1</kbd></span>
             </button>
             <button type="button" class="guest-mode-card" id="posePhotoButton">
-              <span class="mode-icon">✦</span><strong>Pose challenge</strong><span>Four photos with random fun prompts</span><span class="mode-key">Press <kbd>2</kbd></span>
+              <span class="mode-icon">✦</span><strong id="mode2TitleText">Pose challenge</strong><span id="mode2DescriptionText">Four photos with random fun prompts</span><span class="mode-key">Press <kbd>2</kbd></span>
             </button>
             <button type="button" class="guest-mode-card" id="filterPhotoButton">
-              <span class="mode-icon">✧</span><strong>Filter mix</strong><span>Four photos, each with a different filter</span><span class="mode-key">Press <kbd>3</kbd></span>
+              <span class="mode-icon">✧</span><strong id="mode3TitleText">Filter mix</strong><span id="mode3DescriptionText">Four photos, each with a different filter</span><span class="mode-key">Press <kbd>3</kbd></span>
             </button>
             <button type="button" class="guest-mode-card" id="fourPhotoButton">
-              <span class="mode-icon">▦</span><strong>4-photo session</strong><span>Four photos in one layout</span><span class="mode-key">Press <kbd>4</kbd></span>
+              <span class="mode-icon">▦</span><strong id="mode4TitleText">4-photo session</strong><span id="mode4DescriptionText">Four photos in one layout</span><span class="mode-key">Press <kbd>4</kbd></span>
             </button>
           </div>
-          <p class="guest-hint">Choose on screen or use a USB keyboard: <strong>1</strong> single photo, <strong>2</strong> pose challenge, <strong>3</strong> four-filter mix, or <strong>4</strong> standard four-photo session. Photos save automatically to the host-selected SD card folder.</p>
+          <p class="guest-hint" id="guestHint">Choose on screen or use a USB keyboard: <strong>1</strong> single photo, <strong>2</strong> pose challenge, <strong>3</strong> four-filter mix, or <strong>4</strong> standard four-photo session. Photos save automatically to the host-selected SD card folder.</p>
           <div class="error-box" id="welcomeError" role="alert"></div>
         </div>      </div>
     </section>
@@ -356,6 +402,40 @@ worth keeping.</textarea>
                 <div class="field"><label for="welcomeBackgroundColor">HOME BACKGROUND COLOUR</label><input type="color" id="welcomeBackgroundColor" value="#fbf8f3"></div>
                 <div class="field"><label for="welcomeTextColor">HOME TEXT COLOUR</label><input type="color" id="welcomeTextColor" value="#272622"></div>
                 <div class="field full"><label for="welcomeButtonColor">GUEST BUTTON ACCENT COLOUR</label><input type="color" id="welcomeButtonColor" value="#b96f58"><div class="helper">Changes the borders, icons and hover colour of the four guest photo choices.</div></div>
+              </div>
+              <div class="field full section-break">
+                <strong>Welcome screen wording</strong>
+                <small>Change the small feature headings, the session chooser introduction, all four choice-card descriptions and the keyboard instruction. These are saved with each event profile.</small>
+              </div>
+              <div class="field full">
+                <label for="welcomeEyebrow">SMALL INTRO LINE</label>
+                <input type="text" id="welcomeEyebrow" maxlength="55" value="Your event, your style" placeholder="e.g. Make memories together">
+              </div>
+              <div class="field-grid" style="grid-column:1/-1">
+                <div class="field"><label for="welcomeFeature1Title">FEATURE 1 HEADING</label><input type="text" id="welcomeFeature1Title" maxlength="45" value="Choose your session"></div>
+                <div class="field"><label for="welcomeFeature1Description">FEATURE 1 DESCRIPTION</label><input type="text" id="welcomeFeature1Description" maxlength="100" value="One photo or four timed shots."></div>
+                <div class="field"><label for="welcomeFeature2Title">FEATURE 2 HEADING</label><input type="text" id="welcomeFeature2Title" maxlength="45" value="Custom layout"></div>
+                <div class="field"><label for="welcomeFeature2Description">FEATURE 2 DESCRIPTION</label><input type="text" id="welcomeFeature2Description" maxlength="100" value="Designed for this event."></div>
+                <div class="field"><label for="welcomeFeature3Title">FEATURE 3 HEADING</label><input type="text" id="welcomeFeature3Title" maxlength="45" value="Easy download"></div>
+                <div class="field"><label for="welcomeFeature3Description">FEATURE 3 DESCRIPTION</label><input type="text" id="welcomeFeature3Description" maxlength="100" value="Save a print-ready PNG from the browser."></div>
+              </div>
+              <div class="field-grid" style="grid-column:1/-1">
+                <div class="field"><label for="welcomePanelSubtitle">SESSION PANEL SUBHEADING</label><input type="text" id="welcomePanelSubtitle" maxlength="100" value="Choose your photo experience to begin."></div>
+                <div class="field"><label for="welcomePanelBadge">SESSION PANEL BADGE</label><input type="text" id="welcomePanelBadge" maxlength="24" value="Your turn"></div>
+              </div>
+              <div class="field-grid" style="grid-column:1/-1">
+                <div class="field"><label for="mode1Title">OPTION 1 TITLE</label><input type="text" id="mode1Title" maxlength="35" value="Single photo"></div>
+                <div class="field"><label for="mode1Description">OPTION 1 DESCRIPTION</label><input type="text" id="mode1Description" maxlength="85" value="One photo to keep"></div>
+                <div class="field"><label for="mode2Title">OPTION 2 TITLE</label><input type="text" id="mode2Title" maxlength="35" value="Pose challenge"></div>
+                <div class="field"><label for="mode2Description">OPTION 2 DESCRIPTION</label><input type="text" id="mode2Description" maxlength="85" value="Four photos with random fun prompts"></div>
+                <div class="field"><label for="mode3Title">OPTION 3 TITLE</label><input type="text" id="mode3Title" maxlength="35" value="Filter mix"></div>
+                <div class="field"><label for="mode3Description">OPTION 3 DESCRIPTION</label><input type="text" id="mode3Description" maxlength="85" value="Four photos, each with a different filter"></div>
+                <div class="field"><label for="mode4Title">OPTION 4 TITLE</label><input type="text" id="mode4Title" maxlength="35" value="4-photo session"></div>
+                <div class="field"><label for="mode4Description">OPTION 4 DESCRIPTION</label><input type="text" id="mode4Description" maxlength="85" value="Four photos in one layout"></div>
+              </div>
+              <div class="field full">
+                <label for="welcomeHint">INSTRUCTION BELOW THE FOUR OPTIONS</label>
+                <textarea id="welcomeHint" rows="2" maxlength="240" placeholder="Explain the keyboard shortcuts or how guests should start.">Choose on screen or use a USB keyboard: 1 single photo, 2 pose challenge, 3 four-filter mix, or 4 standard four-photo session. Photos save automatically to the host-selected SD card folder.</textarea>
               </div>
               <div class="field full">
                 <label for="stripStyle">PHOTO STRIP STYLE</label>
@@ -547,15 +627,6 @@ worth keeping.</textarea>
       </div>
     </section>
 
-    <section class="screen" id="captureReviewScreen" aria-labelledby="captureReviewTitle">
-      <div class="preview-shell">
-        <div class="preview-copy"><div class="eyebrow">Quick photo check</div><h1 id="captureReviewTitle">Love these shots?</h1><p>Review your layout before it is saved as the finished keepsake. You can retake the full set if anyone blinked or wants another pose.</p>
-          <div class="review-details"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-11V5l-8-3-8 3v6c0 7 8 11 8 11Z"/><path d="m9 12 2 2 4-4"/></svg><span id="captureReviewNote">Your original captures are saved to the selected SD-card folder as you go. Retaking replaces the current session's numbered JPGs.</span></div>
-          <div class="preview-actions"><button type="button" class="btn btn-primary" id="keepPhotosButton">Keep these photos</button><button type="button" class="btn btn-secondary" id="retakePhotosButton">Retake full set</button><button type="button" class="btn btn-soft" id="cancelReviewButton">Cancel session</button></div>
-        </div><div class="preview-image"><img id="captureReviewPreview" alt="Preview of your photo booth layout"></div>
-      </div>
-    </section>
-
     <section class="screen" id="completionScreen" aria-labelledby="completionTitle">
       <div class="completion-shell">
         <div class="completion-card" id="completionCard">
@@ -598,12 +669,12 @@ worth keeping.</textarea>
 
 <canvas id="captureCanvas" class="hidden"></canvas>
 <script>
-// Memory Booth v6.1: fixes duplicate welcomeDescription ID; retains v5 session-selection modes.
+// Memory Booth v6.4: customisable guest session text and viewport-fitted camera screen; automatic finish screen.
 (() => {
   'use strict';
 
   const $ = (id) => document.getElementById(id);
-  const screens = ['welcomeScreen', 'adminLoginScreen', 'adminScreen', 'captureScreen', 'captureReviewScreen', 'completionScreen', 'reviewScreen'];
+  const screens = ['welcomeScreen', 'adminLoginScreen', 'adminScreen', 'captureScreen', 'completionScreen', 'reviewScreen'];
   const form = $('settingsForm');
   const video = $('cameraVideo');
   const canvas = $('captureCanvas');
@@ -634,6 +705,7 @@ worth keeping.</textarea>
   function showScreen(id) {
     screens.forEach(screenId => $(screenId).classList.toggle('active', screenId === id));
     document.body.classList.toggle('welcome-theme', id === 'welcomeScreen');
+    document.body.classList.toggle('capture-mode', id === 'captureScreen');
     document.documentElement.classList.toggle('welcome-theme', id === 'welcomeScreen');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
@@ -653,6 +725,24 @@ worth keeping.</textarea>
       welcomeBackgroundColor: $('welcomeBackgroundColor').value || '#fbf8f3',
       welcomeTextColor: $('welcomeTextColor').value || '#272622',
       welcomeButtonColor: $('welcomeButtonColor').value || '#b96f58',
+      welcomeEyebrow: $('welcomeEyebrow').value.trim() || 'Your event, your style',
+      welcomeFeature1Title: $('welcomeFeature1Title').value.trim() || 'Choose your session',
+      welcomeFeature1Description: $('welcomeFeature1Description').value.trim() || 'One photo or four timed shots.',
+      welcomeFeature2Title: $('welcomeFeature2Title').value.trim() || 'Custom layout',
+      welcomeFeature2Description: $('welcomeFeature2Description').value.trim() || 'Designed for this event.',
+      welcomeFeature3Title: $('welcomeFeature3Title').value.trim() || 'Easy download',
+      welcomeFeature3Description: $('welcomeFeature3Description').value.trim() || 'Save a print-ready PNG from the browser.',
+      welcomePanelSubtitle: $('welcomePanelSubtitle').value.trim() || 'Choose your photo experience to begin.',
+      welcomePanelBadge: $('welcomePanelBadge').value.trim() || 'Your turn',
+      mode1Title: $('mode1Title').value.trim() || 'Single photo',
+      mode1Description: $('mode1Description').value.trim() || 'One photo to keep',
+      mode2Title: $('mode2Title').value.trim() || 'Pose challenge',
+      mode2Description: $('mode2Description').value.trim() || 'Four photos with random fun prompts',
+      mode3Title: $('mode3Title').value.trim() || 'Filter mix',
+      mode3Description: $('mode3Description').value.trim() || 'Four photos, each with a different filter',
+      mode4Title: $('mode4Title').value.trim() || '4-photo session',
+      mode4Description: $('mode4Description').value.trim() || 'Four photos in one layout',
+      welcomeHint: $('welcomeHint').value.trim() || 'Choose on screen or use the 1–4 keyboard shortcuts.',
       stripStyle: $('stripStyle').value || 'classic',
       stripLayout: $('stripLayout').value || 'vertical',
       countdownSeconds: Number($('countdownSeconds').value || 3),
@@ -684,11 +774,23 @@ worth keeping.</textarea>
     document.documentElement.classList.toggle('welcome-theme', welcomeIsActive);
     $('welcomeTitle').textContent = settings.welcomeHeading || 'Make a memory\nworth keeping.';
     $('welcomeDescription').textContent = settings.welcomeDescription || 'Choose a photo experience and make a memory.';
+    $('welcomeEyebrowText').textContent = settings.welcomeEyebrow || 'Your event, your style';
+    for (let n = 1; n <= 3; n++) {
+      $(`welcomeFeature${n}TitleText`).textContent = settings[`welcomeFeature${n}Title`] || ['Choose your session','Custom layout','Easy download'][n - 1];
+      $(`welcomeFeature${n}DescriptionText`).textContent = settings[`welcomeFeature${n}Description`] || ['One photo or four timed shots.','Designed for this event.','Save a print-ready PNG from the browser.'][n - 1];
+    }
+    $('guestPanelBadge').textContent = settings.welcomePanelBadge || 'Your turn';
+    $('guestHint').textContent = settings.welcomeHint || 'Choose on screen or use the 1–4 keyboard shortcuts.';
+    for (let n = 1; n <= 4; n++) {
+      $(`mode${n}TitleText`).textContent = settings[`mode${n}Title`] || ['Single photo','Pose challenge','Filter mix','4-photo session'][n - 1];
+      $(`mode${n}DescriptionText`).textContent = settings[`mode${n}Description`] || ['One photo to keep','Four photos with random fun prompts','Four photos, each with a different filter','Four photos in one layout'][n - 1];
+    }
     $('topBrand').textContent = settings.businessName;
     $('footerBrand').textContent = settings.businessName.toUpperCase();
     $('eventCameraLabel').textContent = settings.eventName.toUpperCase();
     $('guestEventTitle').textContent = settings.eventName || 'Welcome to our event';
-    $('guestEventSubtitle').textContent = settings.eventDate ? `Choose a photo experience · ${new Date(`${settings.eventDate}T12:00:00`).toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'})}` : 'Choose your photo experience to begin.';
+    const panelSubtitle = settings.welcomePanelSubtitle || 'Choose your photo experience to begin.';
+    $('guestEventSubtitle').textContent = settings.eventDate ? `${panelSubtitle} · ${new Date(`${settings.eventDate}T12:00:00`).toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'})}` : panelSubtitle;
     $('completionEvent').textContent = `${settings.businessName || 'Memory Booth'}${settings.eventName ? ' · ' + settings.eventName : ''}`;
     $('completionTitle').textContent = settings.finishTitle || 'Thanks for making memories!';
     $('completionMessage').textContent = settings.finishMessage || 'Please ask the host how to receive your photos.';
@@ -745,6 +847,7 @@ worth keeping.</textarea>
         if (typeof saved.welcomeBackgroundColor === 'string' && /^#[0-9a-f]{6}$/i.test(saved.welcomeBackgroundColor)) $('welcomeBackgroundColor').value = saved.welcomeBackgroundColor;
         if (typeof saved.welcomeTextColor === 'string' && /^#[0-9a-f]{6}$/i.test(saved.welcomeTextColor)) $('welcomeTextColor').value = saved.welcomeTextColor;
         if (typeof saved.welcomeButtonColor === 'string' && /^#[0-9a-f]{6}$/i.test(saved.welcomeButtonColor)) $('welcomeButtonColor').value = saved.welcomeButtonColor;
+        ['welcomeEyebrow','welcomeFeature1Title','welcomeFeature1Description','welcomeFeature2Title','welcomeFeature2Description','welcomeFeature3Title','welcomeFeature3Description','welcomePanelSubtitle','welcomePanelBadge','mode1Title','mode1Description','mode2Title','mode2Description','mode3Title','mode3Description','mode4Title','mode4Description','welcomeHint'].forEach(key => { if (typeof saved[key] === 'string') $(key).value = saved[key]; });
         if (['classic','modern','party'].includes(saved.stripStyle)) $('stripStyle').value = saved.stripStyle;
         if (['vertical','grid'].includes(saved.stripLayout)) $('stripLayout').value = saved.stripLayout;
         if ([1,2,3,5].includes(Number(saved.countdownSeconds))) $('countdownSeconds').value = String(saved.countdownSeconds);
@@ -950,10 +1053,9 @@ worth keeping.</textarea>
       $('countdownOverlay').classList.remove('show');
       $('poseBanner').classList.add('hidden');
       stopCamera();
-      finalStripDataUrl = await createPhotoStrip(currentSettings, capturePhotos.slice());
-      $('captureReviewPreview').src = finalStripDataUrl;
-      $('captureReviewScreen').dataset.total = String(total);
-      showScreen('captureReviewScreen');
+      // No guest confirmation screen: move directly to the automatic finish screen.
+      // finalizeCapturedSession builds the layout, saves files and runs the timer.
+      await finalizeCapturedSession();
       return;
     } catch (error) {
       if (token !== sessionToken) return;
@@ -967,17 +1069,39 @@ worth keeping.</textarea>
   }
 
   async function finalizeCapturedSession() {
-    if (!finalStripDataUrl || !capturePhotos.length) return;
+    if (!capturePhotos.length) {
+      setWelcomeError('No photos were found for this session. Please start again.');
+      showScreen('welcomeScreen');
+      return;
+    }
     const token = sessionToken;
     const total = capturePhotos.length;
-    $('stripPreview').src = finalStripDataUrl;
-    $('reviewTitle').innerHTML = total === 1 ? 'Your photo,<br>ready to keep.' : 'Your memories,<br>ready to keep.';
-    $('reviewDescription').textContent = total === 1 ? 'Your single photo has been captured.' : 'Your four-photo layout has been captured.';
-    $('stripPreview').alt = total === 1 ? 'Your generated single-photo layout preview' : 'Your generated four-photo layout preview';
-    applyBranding(currentSettings);
-    $('completionSaveStatus').textContent = 'Saving your photos to the SD card…';
+
+    // Show the guest finishing screen first. A branding or file-saving problem
+    // must never prevent guests from reaching the after-session message.
+    $('completionSaveStatus').textContent = 'Preparing your photos and saving them to the SD card…';
     $('completionSaveStatus').classList.remove('error');
     showScreen('completionScreen');
+
+    try {
+      if (!finalStripDataUrl) finalStripDataUrl = await createPhotoStrip(currentSettings, capturePhotos.slice());
+      $('stripPreview').src = finalStripDataUrl;
+      $('reviewTitle').innerHTML = total === 1 ? 'Your photo,<br>ready to keep.' : 'Your memories,<br>ready to keep.';
+      $('reviewDescription').textContent = total === 1 ? 'Your single photo has been captured.' : 'Your four-photo layout has been captured.';
+      $('stripPreview').alt = total === 1 ? 'Your generated single-photo layout preview' : 'Your generated four-photo layout preview';
+    } catch (renderError) {
+      $('completionSaveStatus').textContent = 'Your photos were captured, but the preview could not be refreshed. Please ask the host for help.';
+      $('completionSaveStatus').classList.add('error');
+    }
+
+    try {
+      applyBranding(currentSettings);
+    } catch (brandingError) {
+      // Keep a readable default finish screen even if a custom setting is invalid.
+      $('completionTitle').textContent = 'Thanks for making memories!';
+      $('completionMessage').textContent = 'Please ask the host how to receive your photos.';
+    }
+
     try { await saveSessionFilesToCard(); }
     catch (saveError) {
       $('completionSaveStatus').textContent = `Photos could not be fully saved: ${saveError && saveError.message ? saveError.message : 'unknown error'}. Please alert the host.`;
@@ -1288,6 +1412,7 @@ worth keeping.</textarea>
       } catch (error) { setWelcomeError(error.message || 'SD card access needs to be granted again in Admin settings.'); return; }
       currentSettings = getSettings();
       currentSettings.sessionMode = currentSessionMode;
+      finalStripDataUrl = ''; // Always build a fresh layout for each new session.
       eventDirectoryHandle = null;
       currentSessionPrefix = `${makeLocalTimestamp()}-${safeFilename(currentSettings.eventName)}`;
       savedPhotoIndexes = new Set();
@@ -1430,7 +1555,7 @@ worth keeping.</textarea>
     $('profileStatus').textContent = message; $('profileStatus').style.color = error ? '#a32929' : '';
   }
   function applyProfileSettings(saved) {
-    const map = {businessName:'businessName',eventName:'eventName',eventDate:'eventDate',accentColor:'accentColor',welcomeHeading:'welcomeHeading',welcomeDescription:'welcomeDescriptionInput',welcomeBackgroundColor:'welcomeBackgroundColor',welcomeTextColor:'welcomeTextColor',welcomeButtonColor:'welcomeButtonColor',stripStyle:'stripStyle',stripLayout:'stripLayout',countdownSeconds:'countdownSeconds',intervalSeconds:'intervalSeconds',photoFilter:'photoFilter',poseChallenges:'poseChallenges',footerText:'footerText',finishScreenDuration:'finishScreenDuration',finishTitle:'finishTitle',finishMessage:'finishMessage',finishWebsiteLabel:'finishWebsiteLabel',finishWebsiteUrl:'finishWebsiteUrl',finishBackgroundColor:'finishBackgroundColor',finishTextColor:'finishTextColor'};
+    const map = {businessName:'businessName',eventName:'eventName',eventDate:'eventDate',accentColor:'accentColor',welcomeHeading:'welcomeHeading',welcomeDescription:'welcomeDescriptionInput',welcomeBackgroundColor:'welcomeBackgroundColor',welcomeTextColor:'welcomeTextColor',welcomeButtonColor:'welcomeButtonColor',welcomeEyebrow:'welcomeEyebrow',welcomeFeature1Title:'welcomeFeature1Title',welcomeFeature1Description:'welcomeFeature1Description',welcomeFeature2Title:'welcomeFeature2Title',welcomeFeature2Description:'welcomeFeature2Description',welcomeFeature3Title:'welcomeFeature3Title',welcomeFeature3Description:'welcomeFeature3Description',welcomePanelSubtitle:'welcomePanelSubtitle',welcomePanelBadge:'welcomePanelBadge',mode1Title:'mode1Title',mode1Description:'mode1Description',mode2Title:'mode2Title',mode2Description:'mode2Description',mode3Title:'mode3Title',mode3Description:'mode3Description',mode4Title:'mode4Title',mode4Description:'mode4Description',welcomeHint:'welcomeHint',stripStyle:'stripStyle',stripLayout:'stripLayout',countdownSeconds:'countdownSeconds',intervalSeconds:'intervalSeconds',photoFilter:'photoFilter',poseChallenges:'poseChallenges',footerText:'footerText',finishScreenDuration:'finishScreenDuration',finishTitle:'finishTitle',finishMessage:'finishMessage',finishWebsiteLabel:'finishWebsiteLabel',finishWebsiteUrl:'finishWebsiteUrl',finishBackgroundColor:'finishBackgroundColor',finishTextColor:'finishTextColor'};
     Object.entries(map).forEach(([key,id]) => { if (saved[key] !== undefined && $(id)) $(id).value = String(saved[key]); });
     if (Array.isArray(saved.photoFilters)) saved.photoFilters.slice(0,4).forEach((filter,index) => {
       if (['none','vivid','bw','warm','cool','soft'].includes(filter)) $(`filterShot${index + 1}`).value = filter;
@@ -1576,7 +1701,7 @@ worth keeping.</textarea>
     reader.onerror = () => $('logoStatus').textContent = 'The logo could not be read. Try another image.';
     reader.readAsDataURL(file);
   });
-  ['businessName','eventName','eventDate','accentColor','stripStyle','stripLayout','countdownSeconds','intervalSeconds','photoFilter','poseChallenges','filterShot1','filterShot2','filterShot3','filterShot4','footerText','finishScreenDuration','finishTitle','finishMessage','finishWebsiteLabel','finishWebsiteUrl','finishBackgroundColor','finishTextColor'].forEach(id => {
+  ['businessName','eventName','eventDate','accentColor','welcomeHeading','welcomeDescriptionInput','welcomeBackgroundColor','welcomeTextColor','welcomeButtonColor','welcomeEyebrow','welcomeFeature1Title','welcomeFeature1Description','welcomeFeature2Title','welcomeFeature2Description','welcomeFeature3Title','welcomeFeature3Description','welcomePanelSubtitle','welcomePanelBadge','mode1Title','mode1Description','mode2Title','mode2Description','mode3Title','mode3Description','mode4Title','mode4Description','welcomeHint','stripStyle','stripLayout','countdownSeconds','intervalSeconds','photoFilter','poseChallenges','filterShot1','filterShot2','filterShot3','filterShot4','footerText','finishScreenDuration','finishTitle','finishMessage','finishWebsiteLabel','finishWebsiteUrl','finishBackgroundColor','finishTextColor'].forEach(id => {
     $(id).addEventListener('input', () => saveSettings());
     $(id).addEventListener('change', () => saveSettings());
   });
@@ -1585,17 +1710,6 @@ worth keeping.</textarea>
   $('loadProfileButton').addEventListener('click', loadSelectedProfile);
   $('deleteProfileButton').addEventListener('click', deleteSelectedProfile);
   $('refreshStorageButton').addEventListener('click', refreshStorageMonitor);
-  $('keepPhotosButton').addEventListener('click', () => { finalizeCapturedSession(); });
-  $('retakePhotosButton').addEventListener('click', async () => {
-    if (startingSession) return;
-    sessionToken++; busy = false; startingSession = true;
-    try {
-      if (!saveDirectoryHandle) { setWelcomeError('Select an SD-card folder in Host settings before taking photos.'); showScreen('welcomeScreen'); return; }
-      await startCamera(); showScreen('captureScreen'); await runCaptureSession();
-    } catch (error) { stopCamera(); showScreen('welcomeScreen'); setWelcomeError(readableCameraError(error)); }
-    finally { startingSession = false; }
-  });
-  $('cancelReviewButton').addEventListener('click', () => { sessionToken++; busy = false; stopCamera(); resetShotSlots(sessionPhotoCount); showScreen('welcomeScreen'); });
   $('reviewChooseFolderButton').addEventListener('click', openAdminLogin);
   $('reviewChooseFolderButton').addEventListener('click', openAdminLogin);
   $('cancelSessionButton').addEventListener('click', cancelSession);

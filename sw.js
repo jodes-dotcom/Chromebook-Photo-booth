@@ -1,4 +1,4 @@
-const CACHE_NAME = 'memory-booth-pwa-v6-1-selection-fix';
+const CACHE_NAME = 'memory-booth-pwa-v6-4-custom-home-fit-camera';
 const APP_ASSETS = [
   './',
   './index.html',
