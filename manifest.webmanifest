@@ -1,0 +1,30 @@
+{
+  "id": "./index.html",
+  "name": "Memory Booth \u2014 Photo Booth",
+  "short_name": "Memory Booth",
+  "description": "A customisable photo booth for weddings, parties and events.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "display_override": [
+    "standalone",
+    "minimal-ui"
+  ],
+  "orientation": "any",
+  "background_color": "#fbf8f3",
+  "theme_color": "#b96f58",
+  "icons": [
+    {
+      "src": "./icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
